@@ -41,7 +41,7 @@
     text.innerHTML = link;
 
     image.addEventListener("click", e => {
-      copyAction(link);
+      copyAction(text.textContent);
     });
 
     closeBtn.addEventListener("click", e => {
