@@ -61,7 +61,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #55aaff;
+  background-color: rgba(85, 170, 255, 1);
 }
 
 .btn span {
@@ -69,5 +69,5 @@ body {
 }
 
 .btn:hover {
-  opacity: .5;
+  background-color: rgba(85, 170, 255, .5);
 }
