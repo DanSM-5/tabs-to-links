@@ -7,9 +7,49 @@
   const tag = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
 
+  const copyAction = string => {
+    navigator.clipboard
+      .writeText(string)
+      .then(() => {
+        console.log(`${tag} Copy successful!`);
+      })
+      .catch(() => {
+        console.log(`${tag} An error occured :(`);
+      });
+  }
+
+  const createItemsForList = () => {
+    const item = document.createElement("li");
+    const text = document.createElement("span");
+    const image = document.createElement("img");
+    const closeBtn = document.createElement("button");
+
+    item.classList.add("row-link");
+    image.classList.add("image");
+    closeBtn.classList.add("close-button");
+
+    item.appendChild(image);
+    item.appendChild(text);
+    item.appendChild(closeBtn);
+
+    return [ item, image, text, closeBtn ];
+  };
+
   const formatLink = (img, link) => {
-    return `<li class="row-link"><img class="image" src="${img ? img : defaultIcon}"/><span>${link}</span></li>`;
-    // return `<li class="row-link"><div class="image" style="background-image: url(${img});"></div><span>${link}</span></li>`;
+    const [ listItem, image, text, closeBtn ] = createItemsForList();
+    image.src = img ? img : defaultIcon;
+    text.innerHTML = link;
+
+    image.addEventListener("click", e => {
+      copyAction(link);
+    });
+
+    closeBtn.addEventListener("click", e => {
+      const parent = listItem.parentElement;
+      parent.removeChild(listItem);
+    });
+
+    return listItem;
   };
 
   const getTabsFromWindows = (cb, onEnd) => {
@@ -22,17 +62,6 @@
     });
   };
 
-  const copyAction = string => {
-    navigator.clipboard
-      .writeText(string)
-      .then(() => {
-        console.log(`${tag} Copy successful!`);
-      })
-      .catch(() => {
-        console.log(`${tag} An error occured :(`);
-      });
-  }
-
   const getTextLinks = () => Array
       .from(document.querySelectorAll(".row-link span"))
       .map(e => e.innerText)
@@ -40,24 +69,24 @@
 
   const copyHandler = () => {
     const text = getTextLinks();
-
     console.log("String: ", text);
     copyAction(text);
   };
   
   const getHandler = () => {
-    const links = [];
-    getTabsFromWindows(tab => { // cb
+    const list = document.createElement("ul");
+    const forEachTab = tab => {
       const { url, favIconUrl } = tab;
-      links.push(formatLink(favIconUrl, url));
-    }, () => { // onEnd
-      const linksString = links.join("\n");
-      txtArea.innerHTML = `<ul>${linksString}</ul>`;
-    });
+      list.appendChild(formatLink(favIconUrl, url));
+    };
+    const onEnd = () => {
+      txtArea.replaceChildren(list);
+    };
+    getTabsFromWindows(forEachTab, onEnd);
   };
   
   const cleanHandler = () => {
-    txtArea.innerHTML = "";
+    txtArea.replaceChildren();
   };
 
   const load = () => {
