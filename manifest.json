@@ -2,18 +2,13 @@
   "name": "Tabs 2 Links",
   "description": "Get the urls of all the current open tabs in a list",
   "version": "0.0.0.1",
-  "manifest_version": 3,
-  "background": {
-    "service_worker": "background.js"
-    
-  },
+  "manifest_version": 2,
+  "homepage_url": "https://github.com/DanSM-5/tabs-to-links",
   "permissions": [
-    "tabs",
-    "activeTab",
-    "declarativeContent",
-    "storage"
+    "tabs"
   ],
-  "action": {
-    "default_popup": "action/index.html"
+  "browser_action": {
+    "default_popup": "action/index.html",
+    "browser_style": true
   }
 }
