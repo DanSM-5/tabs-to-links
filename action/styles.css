@@ -92,6 +92,7 @@ img.image:hover {
   text-indent: -9999px;
   margin-left: auto;
   flex-shrink: 0;
+  cursor: pointer;
 }
 .close-button:before,
 .close-button:after {
