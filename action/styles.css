@@ -35,7 +35,9 @@ body {
   overflow: hidden;
   margin-right: 5px;
   margin-left: 5px;
+  width: -moz-fit-content;
   width: fit-content;
+  word-wrap: break-word
 }
 
 .row-link .image {
@@ -89,6 +91,7 @@ img.image:hover {
   z-index: 200;
   text-indent: -9999px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 .close-button:before,
 .close-button:after {
