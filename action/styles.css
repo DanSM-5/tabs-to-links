@@ -27,28 +27,61 @@ body {
 
 .row-link {
   display: flex;
-  padding: 5px;
+  position: relative;
   align-items: center;
 }
 
 .row-link span {
   overflow: hidden;
-  margin-right: 5px;
-  margin-left: 5px;
+  padding: 5px 30px;
   width: -moz-fit-content;
   width: fit-content;
   cursor: text;
-  word-wrap: break-word
+  word-wrap: break-word;
+  flex-grow: 1;
 }
 
-.row-link .image {
+.row-link .tab-icon {
+  letter-spacing: unset;
+  word-spacing: unset;
+  text-transform: unset;
+  text-indent: unset;
+  text-shadow: unset;
+  display: unset;
+  text-align: unset;
+  align-items: unset;
+  background-color: unset;
+  box-sizing: unset;
+  margin: unset;
+  font: unset;
+  padding: unset;
+  border-width: unset;
+  border-style: unset;
+  border-color: unset;
+  border-image: initial;
+  background: unset;
+  appearance: unset;
+  -webkit-writing-mode: unset;
+  -moz-writing-mode: unset;
+  border-image: unset;
+  color: unset;
   width: 20px;
   height: 20px;
   cursor: pointer;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  flex-shrink: 0;
+  position: absolute;
+  left: 5px;
 }
 
-img.image:hover {
+.tab-icon:hover {
   opacity: .6;
+}
+
+.tab-icon:active {
+  opacity: 1;
 }
 
 .row-link:nth-child(2n+1) {
@@ -89,7 +122,8 @@ img.image:hover {
   box-shadow: 0px 10 10px 10px rgba(0, 0, 0, 0.25);
   border-radius: 10px;
   background: #000;
-  position: relative;
+  position: absolute;
+  right: 5px;
   z-index: 200;
   text-indent: -9999px;
   margin-left: auto;
