@@ -21,26 +21,29 @@
   const createItemsForList = () => {
     const item = document.createElement("li");
     const text = document.createElement("span");
-    const image = document.createElement("img");
+    const imageBtn = document.createElement("button");
     const closeBtn = document.createElement("button");
 
     item.classList.add("row-link");
-    image.classList.add("image");
+    imageBtn.classList.add("tab-icon");
     closeBtn.classList.add("close-button");
 
-    item.appendChild(image);
+    imageBtn.contentEditable = false;
+
+    item.appendChild(imageBtn);
     item.appendChild(text);
     item.appendChild(closeBtn);
 
-    return [ item, image, text, closeBtn ];
+    return [ item, imageBtn, text, closeBtn ];
   };
 
   const formatLink = (img, link) => {
-    const [ listItem, image, text, closeBtn ] = createItemsForList();
-    image.src = img ? img : defaultIcon;
+    const imageUrl = img ? img : defaultIcon;
+    const [ listItem, imageBtn, text, closeBtn ] = createItemsForList();
+    imageBtn.style.backgroundImage = `url(${imageUrl})`;
     text.innerHTML = link;
 
-    image.addEventListener("click", e => {
+    imageBtn.addEventListener("click", e => {
       copyAction(text.textContent);
     });
 
@@ -53,7 +56,7 @@
   };
 
   const getTabsFromWindows = (cb, onEnd) => {
-    // [Chrome Specific]
+    // [Chrome Specific] - [FireFox support]
     chrome.windows.getAll({ populate: true }, windows => {
       windows.forEach(window => {
         window.tabs.forEach(cb);
