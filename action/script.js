@@ -1,21 +1,26 @@
 
 (_ => {
-  const getBtn = document.querySelector("#get-btn");
+  const resetBtn = document.querySelector("#reset-btn");
   const cleanBtn = document.querySelector("#clean-btn");
   const copyBtn = document.querySelector("#copy-btn");
   const txtArea = document.querySelector("#txt-box");
   const tag = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
+  const [
+    CLICK,
+    LOAD,
+  ] = [
+    "click",
+    "load",
+  ];
 
-  const copyAction = string => {
-    navigator.clipboard
-      .writeText(string)
-      .then(() => {
+  const copyAction = async string => {
+      try {
+        await navigator.clipboard.writeText(string)
         console.log(`${tag} Copy successful!`);
-      })
-      .catch(() => {
+      } catch (error) {
         console.log(`${tag} An error occured :(`);
-      });
+      }
   }
 
   const createItemsForList = () => {
@@ -43,14 +48,19 @@
     imageBtn.style.backgroundImage = `url(${imageUrl})`;
     text.innerHTML = link;
 
-    imageBtn.addEventListener("click", e => {
+    const imgClickHandler = e => {
       copyAction(text.textContent);
-    });
+    };
 
-    closeBtn.addEventListener("click", e => {
+    const clsBtnClickHandler = e => {
       const parent = listItem.parentElement;
+      imageBtn.removeEventListener(CLICK, imgClickHandler)
+      closeBtn.removeEventListener(CLICK, clsBtnClickHandler)
       parent.removeChild(listItem);
-    });
+    };
+
+    imageBtn.addEventListener(CLICK, imgClickHandler);
+    closeBtn.addEventListener(CLICK, clsBtnClickHandler);
 
     return listItem;
   };
@@ -76,7 +86,7 @@
     copyAction(text);
   };
   
-  const getHandler = () => {
+  const getLinksHandler = () => {
     const list = document.createElement("ul");
     const forEachTab = tab => {
       const { url, favIconUrl } = tab;
@@ -93,10 +103,10 @@
   };
 
   const load = () => {
-    getBtn.addEventListener("click", getHandler);
-    cleanBtn.addEventListener("click", cleanHandler);
-    copyBtn.addEventListener("click", copyHandler);
-    window.addEventListener("load", getHandler);
+    resetBtn.addEventListener(CLICK, getLinksHandler);
+    cleanBtn.addEventListener(CLICK, cleanHandler);
+    copyBtn.addEventListener(CLICK, copyHandler);
+    window.addEventListener(LOAD, getLinksHandler);
   };
 
   load();
