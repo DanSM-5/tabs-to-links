@@ -40,16 +40,8 @@ body {
   max-width: 400px;
   max-height: 450px;
   overflow-y: scroll;
-}
-
-.txt-box::-webkit-scrollbar {
-  width: 7px;
-  height: 12px;
-  background-color: var(--light-theme-scroll-background);
-}
-
-.txt-box::-webkit-scrollbar-thumb {
-  background: var(--light-theme-scroll-color);
+  scrollbar-width: thin;
+  scrollbar-color: var(--light-theme-scroll-color) var(--light-theme-scroll-background);
 }
 
 .txt-box ul {
@@ -227,11 +219,8 @@ body {
   .btn:hover {
     background-color: var(--light-theme-button-hover);
   }
-  .txt-box::-webkit-scrollbar {
-    background-color: var(--light-theme-scroll-background);
-  }
-  .txt-box::-webkit-scrollbar-thumb {
-    background: var(--light-theme-scroll-color);
+  .txt-box {
+    scrollbar-color: var(--light-theme-scroll-color) var(--light-theme-scroll-background);
   }
 }
 
@@ -253,10 +242,7 @@ body {
   .btn:hover {
     background-color: var(--dark-theme-button-hover);
   }
-  .txt-box::-webkit-scrollbar {
-    background-color: var(--dark-theme-scroll-background);
-  }
-  .txt-box::-webkit-scrollbar-thumb {
-    background: var(--dark-theme-scroll-color);
+  .txt-box {
+    scrollbar-color: var(--dark-theme-scroll-color) var(--dark-theme-scroll-background);
   }
 }
