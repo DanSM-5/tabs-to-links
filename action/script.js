@@ -4,68 +4,132 @@
   const cleanBtn = document.querySelector("#clean-btn");
   const copyBtn = document.querySelector("#copy-btn");
   const txtArea = document.querySelector("#txt-box");
-  const tag = "[Tabs2Links]";
+  const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
   const [
     CLICK,
     LOAD,
+    ERROR,
   ] = [
     "click",
     "load",
+    "error",
   ];
 
   const copyAction = async string => {
       try {
         await navigator.clipboard.writeText(string)
-        console.log(`${tag} Copy successful!`);
       } catch (error) {
-        console.log(`${tag} An error occured :(`);
+        console.warn(`${TAG} Unable to copy text in clipboard.`);
       }
   }
 
-  const createItemsForList = () => {
-    const item = document.createElement("li");
-    const text = document.createElement("span");
+  const getImageButton = (url) => {
     const imageBtn = document.createElement("button");
-    const closeBtn = document.createElement("button");
 
+    if (!url) {
+      // Use default image
+      imageBtn.style.backgroundImage = `url(${defaultIcon})`;
+      return imageBtn;
+    }
+
+    // Create image to handle error
+    const img = new Image();
+    img.src = url;
+
+    const onError = () => {
+      imageBtn.style.backgroundImage = `url(${defaultIcon})`;
+      // img.removeEventListener(ERROR, onError);
+      // img.removeEventListener(LOAD, onLoad);
+    };
+    const onLoad = () => {
+      imageBtn.style.backgroundImage = `url(${url})`;
+      // img.removeEventListener(ERROR, onError);
+      // img.removeEventListener(LOAD, onLoad);
+    };
+
+    img.addEventListener(ERROR, onError);
+    img.addEventListener(LOAD, onLoad);
+
+    return imageBtn;
+  };
+
+  const getTextContainer = (linkText) => {
+    const text = document.createElement("span");
+    text.innerHTML = linkText;
+
+    return text
+  };
+
+  const createItemForList = (linkText, imageUrl) => {
+    // HTML elements
+    const text = getTextContainer(linkText);
+    const imageBtn = getImageButton(imageUrl);
+    const item = document.createElement("li");
+    const imageWrapper = document.createElement("div");
+    const closeBtn = document.createElement("button");
+    const closeBtnContainer = document.createElement("div");
+    const closeWrapper = document.createElement("div");
+
+    closeBtnContainer.appendChild(closeBtn)
+
+    imageWrapper.appendChild(imageBtn);
+    closeWrapper.appendChild(closeBtnContainer);
+
+    item.appendChild(imageWrapper);
+    item.appendChild(text);
+    item.appendChild(closeWrapper);
+
+    // CSS styling
     item.classList.add("row-link");
     imageBtn.classList.add("tab-icon");
     closeBtn.classList.add("close-button");
+    closeBtnContainer.classList.add("close-button-container");
+    imageWrapper.classList.add("button-wrapper");
+    closeWrapper.classList.add("button-wrapper");
 
-    imageBtn.contentEditable = false;
-
-    item.appendChild(imageBtn);
-    item.appendChild(text);
-    item.appendChild(closeBtn);
-
-    return [ item, imageBtn, text, closeBtn ];
-  };
-
-  const formatLink = (img, link) => {
-    const imageUrl = img ? img : defaultIcon;
-    const [ listItem, imageBtn, text, closeBtn ] = createItemsForList();
-    imageBtn.style.backgroundImage = `url(${imageUrl})`;
-    text.innerHTML = link;
-
-    const imgClickHandler = e => {
+    // Event Handlers
+    const onClickImgButton = e => {
       copyAction(text.textContent);
     };
 
-    const clsBtnClickHandler = e => {
-      const parent = listItem.parentElement;
-      imageBtn.removeEventListener(CLICK, imgClickHandler)
-      closeBtn.removeEventListener(CLICK, clsBtnClickHandler)
-      parent.removeChild(listItem);
+    const onClickCloseButton = e => {
+      const parent = item.parentElement;
+      imageWrapper.removeEventListener(CLICK, onClickImgButton)
+      closeWrapper.removeEventListener(CLICK, onClickCloseButton)
+      parent.removeChild(item);
     };
 
-    imageBtn.addEventListener(CLICK, imgClickHandler);
-    closeBtn.addEventListener(CLICK, clsBtnClickHandler);
+    imageWrapper.addEventListener(CLICK, onClickImgButton);
+    closeWrapper.addEventListener(CLICK, onClickCloseButton);
 
-    return listItem;
+    // Prevent editting buttons elements and wrappers
+    imageBtn.contentEditable = false;
+    closeBtn.contentEditable = false;
+    imageWrapper.contentEditable = false;
+    closeWrapper.contentEditable = false;
+
+    return { item, imageBtn, text, closeBtn, imageWrapper, closeWrapper };
   };
 
-  const getTabsFromWindows = (cb, onEnd) => {
+  const formatLink = (linkText, imageUrl) => {
+    const { item } = createItemForList(linkText, imageUrl);
+
+    return item;
+  };
+
+  // Original
+  // const getTabsFromWindows = (cb, onEnd) => {
+  //   // [Chrome Specific] - [FireFox support]
+  //   chrome.windows.getAll({ populate: true }, windows => {
+  //     windows.forEach(window => {
+  //       window.tabs.forEach(cb);
+  //     });
+  //     onEnd();
+  //   });
+  // };
+
+  const setTabsFromAllWindows = (cb, onEnd) => {
     // [Chrome Specific] - [FireFox support]
     chrome.windows.getAll({ populate: true }, windows => {
       windows.forEach(window => {
@@ -75,14 +139,26 @@
     });
   };
 
-  const getTextLinks = () => Array
+  const setTabsCurrentWindow = (cb, onEnd) => {
+    // [Chrome Specific] - [FireFox support]
+    chrome.windows.getCurrent({ populate: true }, window => {
+      window.tabs.forEach(cb);
+      onEnd();
+    });
+  };
+
+  const getAllTextLinks = () => Array
       .from(document.querySelectorAll(".row-link span"))
-      .map(e => e.innerText)
-      .reduce((acc, curr) => !!acc ? `${acc}\n${curr}` : curr, "");
+      .reduce((contentText, el) => {
+        const itemText = el.innerText || "";
+
+        // Prevent starting with break line
+        return contentText ? `${contentText}\n${itemText}` : itemText; 
+      }, "");
 
   const copyHandler = () => {
-    const text = getTextLinks();
-    console.log("String: ", text);
+    const text = getAllTextLinks();
+    // console.log("String: ", text);
     copyAction(text);
   };
   
@@ -90,12 +166,12 @@
     const list = document.createElement("ul");
     const forEachTab = tab => {
       const { url, favIconUrl } = tab;
-      list.appendChild(formatLink(favIconUrl, url));
+      list.appendChild(formatLink(url, favIconUrl));
     };
     const onEnd = () => {
       txtArea.replaceChildren(list);
     };
-    getTabsFromWindows(forEachTab, onEnd);
+    setTabsFromAllWindows(forEachTab, onEnd);
   };
   
   const cleanHandler = () => {
