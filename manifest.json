@@ -1,9 +1,10 @@
 {
   "name": "Tabs 2 Links",
   "description": "Get the urls of all the current open tabs in a list",
-  "version": "0.0.0.1",
+  "version": "0.0.1",
   "manifest_version": 3,
   "permissions": [
+    "storage",
     "tabs"
   ],
   "action": {

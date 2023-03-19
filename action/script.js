@@ -1,5 +1,7 @@
 
 (_ => {
+  const allWindowsCheckbox = document.querySelector("#all-windows");
+  const allWindowsBtn = document.querySelector("#all-windows-btn");
   const resetBtn = document.querySelector("#reset-btn");
   const cleanBtn = document.querySelector("#clean-btn");
   const copyBtn = document.querySelector("#copy-btn");
@@ -15,6 +17,9 @@
     "load",
     "error",
   ];
+  const STORAGE = {
+    CONFIG: "config",
+  };
 
   const copyAction = async string => {
       try {
@@ -76,9 +81,7 @@
     imageWrapper.appendChild(imageBtn);
     closeWrapper.appendChild(closeBtnContainer);
 
-    item.appendChild(imageWrapper);
-    item.appendChild(text);
-    item.appendChild(closeWrapper);
+    item.replaceChildren(imageWrapper, text, closeWrapper);
 
     // CSS styling
     item.classList.add("row-link");
@@ -118,43 +121,87 @@
     return item;
   };
 
-  // Original
-  // const getTabsFromWindows = (cb, onEnd) => {
-  //   // [Chrome Specific] - [FireFox support]
-  //   chrome.windows.getAll({ populate: true }, windows => {
-  //     windows.forEach(window => {
-  //       window.tabs.forEach(cb);
-  //     });
-  //     onEnd();
-  //   });
-  // };
-
-  const setTabsFromAllWindows = (cb, onEnd) => {
-    // [Chrome Specific] - [FireFox support]
-    chrome.windows.getAll({ populate: true }, windows => {
-      windows.forEach(window => {
-        window.tabs.forEach(cb);
-      });
-      onEnd();
+  const getStorage = (key) => {
+    return new Promise(resolve => {
+      chrome.storage.sync.get(key, stored => {
+        resolve(stored[key] || {});
+      })
     });
   };
 
-  const setTabsCurrentWindow = (cb, onEnd) => {
-    // [Chrome Specific] - [FireFox support]
-    chrome.windows.getCurrent({ populate: true }, window => {
-      window.tabs.forEach(cb);
-      onEnd();
+  const setStorage = (key, item) => {
+    return new Promise(async resolve => {
+      const stored = await getStorage(key);
+      const updated = {
+        [key]: {
+          ...stored,
+          ...item,
+        }
+      };
+  
+      chrome.storage.sync.set(updated, () => {
+        resolve(updated)
+      });
+    });
+  };
+
+  const setTabsFromAllWindows = (cb) => {
+    return new Promise(resolve => {
+      // [Chrome Specific] - [FireFox support]
+      chrome.windows.getAll({ populate: true }, windows => {
+        windows.forEach(window => {
+          window.tabs.forEach(cb);
+        });
+
+        resolve();
+      });
+    });
+  };
+
+  const setTabsCurrentWindow = (cb) => {
+    return new Promise(resolve => {
+      // [Chrome Specific] - [FireFox support]
+      chrome.windows.getCurrent({ populate: true }, window => {
+        window.tabs.forEach(cb);
+
+        resolve();
+      });
+    });
+  };
+
+  const getTabsFromAllWindows = () => {
+    return new Promise(resolve => {
+      // [Chrome Specific] - [FireFox support]
+      chrome.windows.getAll({ populate: true }, windows => {
+        let allTabs = [];
+
+        for (let i = 0; i < windows.length; ++i) {
+          const win = windows[i];
+          allTabs = allTabs.concat(win.tabs)
+        }
+
+        resolve(allTabs);
+      });
+    });
+  };
+
+  const getTabsCurrentWindow = () => {
+    return new Promise(resolve => {
+      // [Chrome Specific] - [FireFox support]
+      chrome.windows.getCurrent({ populate: true }, window => {
+        resolve(window.tabs);
+      });
     });
   };
 
   const getAllTextLinks = () => Array
-      .from(document.querySelectorAll(".row-link span"))
-      .reduce((contentText, el) => {
-        const itemText = el.innerText || "";
+    .from(document.querySelectorAll(".row-link span"))
+    .reduce((contentText, el) => {
+      const itemText = el.innerText || "";
 
-        // Prevent starting with break line
-        return contentText ? `${contentText}\n${itemText}` : itemText; 
-      }, "");
+      // Prevent starting with break line
+      return contentText ? `${contentText}\n${itemText}` : itemText; 
+    }, "");
 
   const copyHandler = () => {
     const text = getAllTextLinks();
@@ -162,28 +209,79 @@
     copyAction(text);
   };
   
-  const getLinksHandler = () => {
+  const getLinksHandler = async () => {
     const list = document.createElement("ul");
     const forEachTab = tab => {
       const { url, favIconUrl } = tab;
       list.appendChild(formatLink(url, favIconUrl));
     };
-    const onEnd = () => {
-      txtArea.replaceChildren(list);
-    };
-    setTabsFromAllWindows(forEachTab, onEnd);
+
+    const checked = allWindowsCheckbox.checked;
+
+    // TODO: Decide best approach
+    // const setTabs = checked
+    //   ? setTabsFromAllWindows
+    //   : setTabsCurrentWindow;
+
+    // await setTabs(forEachTab);
+
+    const tabs = checked
+      ? await getTabsFromAllWindows()
+      : await getTabsCurrentWindow()
+
+    tabs.forEach(forEachTab);
+
+    txtArea.replaceChildren(list);
   };
   
   const cleanHandler = () => {
     txtArea.replaceChildren();
   };
 
-  const load = () => {
+  const checkAllWindowsHandler = () => {
+    const checked = !allWindowsCheckbox.checked;
+
+    setStorage(STORAGE.CONFIG, { checked })
+      .catch(e => {
+        console.error(`${TAG} State could not be saved`);
+      });
+
+    allWindowsCheckbox.checked = checked;
+
+    getLinksHandler();
+  };
+
+  const setObserverTxtArea = () => {
+    const config = { childList: true, subtree: true };
+
+    // Remove content editable if there is nore more items
+    const callback = (mutationList, observer) => {
+      txtArea.setAttribute(
+        "contenteditable",
+        !!txtArea.children?.[0]?.childElementCount,
+      );
+    };
+
+    const observer = new MutationObserver(callback);
+
+    observer.observe(txtArea, config);
+  };
+
+  const onWindowsLoad = async () => {
+    const { checked } = await getStorage(STORAGE.CONFIG);
+    allWindowsCheckbox.checked = !!checked;
+
+    getLinksHandler();
+    setObserverTxtArea();
+  };
+
+  const loadListeners = () => {
+    allWindowsBtn.addEventListener(CLICK, checkAllWindowsHandler);
     resetBtn.addEventListener(CLICK, getLinksHandler);
     cleanBtn.addEventListener(CLICK, cleanHandler);
     copyBtn.addEventListener(CLICK, copyHandler);
-    window.addEventListener(LOAD, getLinksHandler);
+    window.addEventListener(LOAD, onWindowsLoad);
   };
 
-  load();
+  loadListeners();
 })();
