@@ -5,6 +5,7 @@
   "manifest_version": 2,
   "homepage_url": "https://github.com/DanSM-5/tabs-to-links",
   "permissions": [
+    "storage",
     "tabs"
   ],
   "browser_action": {
