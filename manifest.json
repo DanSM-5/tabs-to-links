@@ -1,7 +1,7 @@
 {
   "name": "Tabs 2 Links",
   "description": "Get the urls of all the current open tabs in a list",
-  "version": "0.0.0.1",
+  "version": "1.0.0",
   "manifest_version": 2,
   "homepage_url": "https://github.com/DanSM-5/tabs-to-links",
   "permissions": [
@@ -10,5 +10,11 @@
   "browser_action": {
     "default_popup": "action/index.html",
     "browser_style": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "dan@sm.com",
+      "strict_min_version": "42.0"
+    }
   }
 }
