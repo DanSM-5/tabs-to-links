@@ -61,7 +61,7 @@
 
   const getTextContainer = (linkText) => {
     const text = document.createElement("span");
-    text.innerHTML = linkText;
+    text.textContent = linkText;
 
     return text
   };
