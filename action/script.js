@@ -236,14 +236,19 @@
     });
   };
 
-  const getAllTextLinks = () => document
-    .querySelectorAll(".row-link:not(.hide) span")
-    .reduce((contentText, el) => {
-      const itemText = el.innerText || "";
+  const getAllTextLinks = () => {
+    let text = "";
+    document
+      .querySelectorAll(".row-link:not(.hide) span")
+      .forEach((el) => {
+      const itemText = el.textContent || "";
 
       // Prevent starting with break line
-      return contentText ? `${contentText}\n${itemText}` : itemText; 
-    }, "");
+      text = text ? `${text}\n${itemText}` : itemText;
+    });
+
+    return text;
+  }
 
   const copyHandler = () => {
     const text = getAllTextLinks();
