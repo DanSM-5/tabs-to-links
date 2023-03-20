@@ -298,15 +298,26 @@
     getLinksHandler();
   };
 
+  // Remove content editable if there is nore more items
+  const enableContentEditable = (mutationList, observer) => {
+    // Enable if there are items left and they are visible
+    const enableEdit = !!document
+      .querySelectorAll('.row-link:not(.hide)').length
+
+    txtArea.setAttribute("contenteditable", enableEdit);
+  };
+
   const searchHandler = () => {
     const input = searchBox.value;
     if (!input || input.length === 0) {
       setAllVisible();
+      enableContentEditable();
 
       return;
     }
 
     filterItems(input);
+    enableContentEditable();
   };
 
   const debouncedSearch = () => {
@@ -323,17 +334,7 @@
   const setObserverTxtArea = () => {
     const config = { childList: true, subtree: true };
 
-    // Remove content editable if there is nore more items
-    const callback = (mutationList, observer) => {
-      // TODO: Fix bug if all items are hidden from result
-      // text area will still be editable.
-      txtArea.setAttribute(
-        "contenteditable",
-        !!txtArea.children?.[0]?.childElementCount,
-      );
-    };
-
-    const observer = new MutationObserver(callback);
+    const observer = new MutationObserver(enableContentEditable);
 
     observer.observe(txtArea, config);
   };
