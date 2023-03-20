@@ -34,13 +34,45 @@ body {
   justify-content: center;
   flex-direction: column;
   font-size: 1rem;
+  box-sizing: border-box;
+}
+
+#search-wrapper {
+  height: 40px;
+  width: 100%;
+  display: flex;
+}
+
+.search-box-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+  margin-right: 20px;
+  width: 100%;
+}
+
+.logo-icon,
+.tab-icon {
+  height: 20px;
+  width: 20px;
+}
+
+.search-box {
+  height: 20px;
+  width: 100%;
+  border-radius: 10px;
+  color: var(--light-theme-text);
+  background: var(--light-theme-scroll-background);
+}
+
+.search-box:focus-visible {
+  outline: dotted;
 }
 
 .txt-box {
   width: 400px;
-  min-height: 400px;
   max-width: 400px;
-  max-height: 400px;
+  height: 350px;
 }
 
 .txt-box:focus-visible {
@@ -52,7 +84,7 @@ body {
   margin: 0;
   padding: 0;
   overflow-y: scroll;
-  max-height: 400px;
+  max-height: 350px;
 }
 
 .txt-box::-webkit-scrollbar {
@@ -114,8 +146,6 @@ body {
   -moz-writing-mode: unset;
   border-image: unset;
   color: unset;
-  width: 20px;
-  height: 20px;
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
@@ -252,6 +282,10 @@ body {
   transform: rotate(180deg);
 }
 
+.hide {
+  display: none;
+}
+
 @media (prefers-color-scheme: ligth) {
   body {
     background-color: var(--light-theme);
@@ -287,6 +321,13 @@ body {
   }
   .button-wrapper:active {
     background: var(--light-theme-btn-wrapper-active);
+  }
+  .search-box {
+    color: var(--light-theme-text);
+    background: var(--light-theme-scroll-background);
+  }
+  .search-box:focus-visible {
+    outline-color: var(--light-theme-button-hover);
   }
 }
 
@@ -325,5 +366,12 @@ body {
   }
   .button-wrapper:active {
     background: var(--dark-theme-btn-wrapper-active);
+  }
+  .search-box {
+    color: var(--dark-theme-text);
+    background: var(--dark-theme-scroll-background);
+  }
+  .search-box:focus-visible {
+    outline-color: var(--dark-theme-button-hover);
   }
 }

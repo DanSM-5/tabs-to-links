@@ -2,6 +2,8 @@
 (_ => {
   const allWindowsCheckbox = document.querySelector("#all-windows");
   const allWindowsBtn = document.querySelector("#all-windows-btn");
+  const searchBox = document.querySelector("#search-box");
+  const searchBtn = document.querySelector("#search-btn");
   const resetBtn = document.querySelector("#reset-btn");
   const cleanBtn = document.querySelector("#clean-btn");
   const copyBtn = document.querySelector("#copy-btn");
@@ -12,21 +14,64 @@
     CLICK,
     LOAD,
     ERROR,
+    HIDE,
+    REMOVE,
+    ADD,
+    KEYUP,
   ] = [
     "click",
     "load",
     "error",
+    "hide",
+    "remove",
+    "add",
+    "keyup",
   ];
   const STORAGE = {
     CONFIG: "config",
   };
 
-  const copyAction = async string => {
+  let searchTimer = -1;
+
+  const loaded = {
+    items: new Map(),
+  };
+
+  // TODO: Add message for no results?
+  // TODO: Need to improve search. Add basic search.
+  // Regex will do for now.
+  const filterItems = (input) => {
+    loaded.items.forEach(item => {
+      const text = item.children[1];
+      let method = REMOVE;
+      // TODO: Not sure if regex could throw exception.
       try {
-        await navigator.clipboard.writeText(string)
+        const searchPatter = new RegExp(input);
+
+        if (!searchPatter.test(text.textContent)) {
+          method = ADD;
+        }
+        
       } catch (error) {
-        console.warn(`${TAG} Unable to copy text in clipboard.`);
+        if (!text.textContent.includes(input)) {
+          method = ADD;
+        }
       }
+
+      item.classList[method](HIDE);
+    });
+  };
+
+  const setAllVisible = () => {
+    loaded.items.forEach(i => i.classList.remove(HIDE));
+  };
+
+  const copyAction = async string => {
+    try {
+      await navigator.clipboard.writeText(string)
+    } catch (error) {
+      console.warn(`${TAG} Unable to copy text in clipboard.`);
+    }
   }
 
   const getImageButton = (url) => {
@@ -101,6 +146,7 @@
       imageWrapper.removeEventListener(CLICK, onClickImgButton)
       closeWrapper.removeEventListener(CLICK, onClickCloseButton)
       parent.removeChild(item);
+      loaded.items.delete(item);
     };
 
     imageWrapper.addEventListener(CLICK, onClickImgButton);
@@ -195,7 +241,7 @@
   };
 
   const getAllTextLinks = () => Array
-    .from(document.querySelectorAll(".row-link span"))
+    .from(document.querySelectorAll(".row-link:not(.hide) span"))
     .reduce((contentText, el) => {
       const itemText = el.innerText || "";
 
@@ -205,15 +251,17 @@
 
   const copyHandler = () => {
     const text = getAllTextLinks();
-    // console.log("String: ", text);
     copyAction(text);
   };
   
   const getLinksHandler = async () => {
     const list = document.createElement("ul");
+    loaded.items.clear();
     const forEachTab = tab => {
       const { url, favIconUrl } = tab;
-      list.appendChild(formatLink(url, favIconUrl));
+      const item = formatLink(url, favIconUrl);
+      loaded.items.set(item, item);
+      list.appendChild(item);
     };
 
     const checked = allWindowsCheckbox.checked;
@@ -236,6 +284,7 @@
   
   const cleanHandler = () => {
     txtArea.replaceChildren();
+    loaded.items.clear();
   };
 
   const checkAllWindowsHandler = () => {
@@ -251,11 +300,35 @@
     getLinksHandler();
   };
 
+  const searchHandler = () => {
+    const input = searchBox.value;
+    if (!input || input.length === 0) {
+      setAllVisible();
+
+      return;
+    }
+
+    filterItems(input);
+  }
+
+  const debouncedSearch = () => {
+    if (searchTimer !== -1) {
+      clearTimeout(searchTimer);
+    }
+
+    searchTimer = setTimeout(() => {
+      searchTimer = -1;
+      searchHandler();
+    }, 300);
+  }
+
   const setObserverTxtArea = () => {
     const config = { childList: true, subtree: true };
 
     // Remove content editable if there is nore more items
     const callback = (mutationList, observer) => {
+      // TODO: Fix bug if all items are hidden from result
+      // text area will still be editable.
       txtArea.setAttribute(
         "contenteditable",
         !!txtArea.children?.[0]?.childElementCount,
@@ -276,6 +349,8 @@
   };
 
   const loadListeners = () => {
+    searchBox.addEventListener(KEYUP, debouncedSearch);
+    searchBtn.addEventListener(CLICK, searchHandler);
     allWindowsBtn.addEventListener(CLICK, checkAllWindowsHandler);
     resetBtn.addEventListener(CLICK, getLinksHandler);
     cleanBtn.addEventListener(CLICK, cleanHandler);
