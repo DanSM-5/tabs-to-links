@@ -33,15 +33,11 @@
 
   let searchTimer = -1;
 
-  const loaded = {
-    items: new Map(),
-  };
-
   // TODO: Add message for no results?
   // TODO: Need to improve search. Add basic search.
   // Regex will do for now.
   const filterItems = (input) => {
-    loaded.items.forEach(item => {
+    document.querySelectorAll(".row-link").forEach(item => {
       const text = item.children[1];
       let method = REMOVE;
       // TODO: Not sure if regex could throw exception.
@@ -63,12 +59,13 @@
   };
 
   const setAllVisible = () => {
-    loaded.items.forEach(i => i.classList.remove(HIDE));
+    document.querySelectorAll(".row-link")
+      .forEach(i => i.classList.remove(HIDE));
   };
 
   const copyAction = async string => {
     try {
-      await navigator.clipboard.writeText(string)
+      await navigator.clipboard.writeText(string);
     } catch (error) {
       console.warn(`${TAG} Unable to copy text in clipboard.`);
     }
@@ -108,7 +105,7 @@
     const text = document.createElement("span");
     text.textContent = linkText;
 
-    return text
+    return text;
   };
 
   const createItemForList = (linkText, imageUrl) => {
@@ -121,7 +118,7 @@
     const closeBtnContainer = document.createElement("div");
     const closeWrapper = document.createElement("div");
 
-    closeBtnContainer.appendChild(closeBtn)
+    closeBtnContainer.appendChild(closeBtn);
 
     imageWrapper.appendChild(imageBtn);
     closeWrapper.appendChild(closeBtnContainer);
@@ -143,10 +140,9 @@
 
     const onClickCloseButton = e => {
       const parent = item.parentElement;
-      imageWrapper.removeEventListener(CLICK, onClickImgButton)
-      closeWrapper.removeEventListener(CLICK, onClickCloseButton)
+      imageWrapper.removeEventListener(CLICK, onClickImgButton);
+      closeWrapper.removeEventListener(CLICK, onClickCloseButton);
       parent.removeChild(item);
-      loaded.items.delete(item);
     };
 
     imageWrapper.addEventListener(CLICK, onClickImgButton);
@@ -171,7 +167,7 @@
     return new Promise(resolve => {
       chrome.storage.sync.get(key, stored => {
         resolve(stored[key] || {});
-      })
+      });
     });
   };
 
@@ -186,7 +182,7 @@
       };
   
       chrome.storage.sync.set(updated, () => {
-        resolve(updated)
+        resolve(updated);
       });
     });
   };
@@ -240,8 +236,8 @@
     });
   };
 
-  const getAllTextLinks = () => Array
-    .from(document.querySelectorAll(".row-link:not(.hide) span"))
+  const getAllTextLinks = () => document
+    .querySelectorAll(".row-link:not(.hide) span")
     .reduce((contentText, el) => {
       const itemText = el.innerText || "";
 
@@ -256,11 +252,9 @@
   
   const getLinksHandler = async () => {
     const list = document.createElement("ul");
-    loaded.items.clear();
     const forEachTab = tab => {
       const { url, favIconUrl } = tab;
       const item = formatLink(url, favIconUrl);
-      loaded.items.set(item, item);
       list.appendChild(item);
     };
 
@@ -275,7 +269,7 @@
 
     const tabs = checked
       ? await getTabsFromAllWindows()
-      : await getTabsCurrentWindow()
+      : await getTabsCurrentWindow();
 
     tabs.forEach(forEachTab);
 
@@ -284,7 +278,6 @@
   
   const cleanHandler = () => {
     txtArea.replaceChildren();
-    loaded.items.clear();
   };
 
   const checkAllWindowsHandler = () => {
@@ -309,7 +302,7 @@
     }
 
     filterItems(input);
-  }
+  };
 
   const debouncedSearch = () => {
     if (searchTimer !== -1) {
@@ -320,7 +313,7 @@
       searchTimer = -1;
       searchHandler();
     }, 300);
-  }
+  };
 
   const setObserverTxtArea = () => {
     const config = { childList: true, subtree: true };
