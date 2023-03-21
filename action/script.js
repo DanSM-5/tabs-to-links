@@ -119,17 +119,17 @@
     //   : ADD // Add .hide class
 
     document.querySelectorAll(ALL_ROWS).forEach(item => {
-      const text = item.children[1];
+      const text = item.querySelector(SPAN)?.textContent || '';
       let method = REMOVE;
       try {
         const searchPatter = new RegExp(input);
 
-        if (!searchPatter.test(text.textContent)) {
+        if (!searchPatter.test(text)) {
           method = ADD;
         }
         
       } catch (error) {
-        if (!text.textContent.includes(input)) {
+        if (!text.includes(input)) {
           method = ADD;
         }
       }
