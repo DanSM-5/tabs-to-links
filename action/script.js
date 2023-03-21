@@ -1,5 +1,19 @@
 
+// Cases where the chrome object is used it preceded by the comment:
+// [Chrome Specific] - [FireFox support]
+// This extension works fine in both browsers with minimal css differences.
+// Chrome manifest: v3
+// Firefox manifest: v2
+
+// TODO: Add a top level browser class fix incompatibility in css,
+// and merge master and master-firefox together
+
+// TODO: Consider a build script. Firefox and chrome cannot use same
+// manifest as chrome does not support "browser_specific_settings"
+// and will throw an exception if this is present.
+
 (_ => {
+  // HTML Elements
   const allWindowsCheckbox = document.querySelector("#all-windows");
   const allWindowsBtn = document.querySelector("#all-windows-btn");
   const searchBox = document.querySelector("#search-box");
@@ -10,7 +24,9 @@
   const txtArea = document.querySelector("#txt-box");
   const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
+  // Constants
   const [
+    BLUR,
     CLICK,
     LOAD,
     ERROR,
@@ -18,7 +34,15 @@
     REMOVE,
     ADD,
     KEYUP,
+    SPAN,
+    BUTTON,
+    DIV,
+    LI,
+    UL,
+    EMPTY,
+    EDITABLE,
   ] = [
+    "blur",
     "click",
     "load",
     "error",
@@ -26,7 +50,43 @@
     "remove",
     "add",
     "keyup",
+    "span",
+    "button",
+    "div",
+    "li",
+    "ul",
+    "",
+    "contenteditable",
   ];
+  // CSS Selectors
+  const [
+    ALL_ROWS,
+    VISIBLE_ROWS,
+    VISIBLE_LINKS,
+    COPY_BUTTON,
+    REMOVE_BUTTON,
+  ] = [
+    ".row-link",
+    ".row-link:not(.hide)",
+    ".row-link:not(.hide) span",
+    ".button-wrapper:first-child",
+    ".button-wrapper:last-child",
+  ];
+  // CSS Clases
+  const [
+    ROW_LINK,
+    TAB_ICON,
+    CLOSE_BUTTON,
+    CLOSE_BUTTON_CONTAINER,
+    BUTTON_WRAPPER,
+  ] = [
+    "row-link",
+    "tab-icon",
+    "close-button",
+    "close-button-container",
+    "button-wrapper",
+  ];
+  // Storage keys
   const STORAGE = {
     CONFIG: "config",
   };
@@ -37,19 +97,45 @@
   // TODO: Need to improve search. Add basic search.
   // Regex will do for now.
   const filterItems = (input) => {
-    document.querySelectorAll(".row-link").forEach(item => {
-      const text = item.children[1];
+    // Regex
+    // Exceptions: SyntaxError
+    // Thrown if one of the following is true:
+    // > pattern cannot be parsed as a valid regular expression.
+    // > flags contains repeated characters or any character outside of those allowed.
+    // Src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp
+
+    // TODO: Investigate if error is at instantiation time (e.g. new Regex(input))
+    // or when using the object (e.g. someRegex.test(text)).
+    // The below snipet could be a better abstraction and avoid continues exceptions
+    // but it will only work if the exception is during instantiation.
+    // The current approach is better for the later but generally safer.
+
+    // let isMatchingText;
+
+    // try {
+    //   const searchPatter = new RegExp(input);
+
+    //   isMatchingText = (content) => searchPatter.test(content);
+    // } catch (error) {
+    //   isMatchingText = (content) => content.includes(input);
+    // }
+
+    // const method = isMatchingText(text.textContent)
+    //   ? REMOVE // Remove .hide class
+    //   : ADD // Add .hide class
+
+    document.querySelectorAll(ALL_ROWS).forEach(item => {
+      const text = item.querySelector(SPAN)?.textContent || '';
       let method = REMOVE;
-      // TODO: Not sure if regex could throw exception.
       try {
         const searchPatter = new RegExp(input);
 
-        if (!searchPatter.test(text.textContent)) {
+        if (!searchPatter.test(text)) {
           method = ADD;
         }
         
       } catch (error) {
-        if (!text.textContent.includes(input)) {
+        if (!text.includes(input)) {
           method = ADD;
         }
       }
@@ -59,7 +145,7 @@
   };
 
   const setAllVisible = () => {
-    document.querySelectorAll(".row-link")
+    document.querySelectorAll(ALL_ROWS)
       .forEach(i => i.classList.remove(HIDE));
   };
 
@@ -72,7 +158,7 @@
   }
 
   const getImageButton = (url) => {
-    const imageBtn = document.createElement("button");
+    const imageBtn = document.createElement(BUTTON);
 
     if (!url) {
       // Use default image
@@ -102,21 +188,50 @@
   };
 
   const getTextContainer = (linkText) => {
-    const text = document.createElement("span");
+    const text = document.createElement(SPAN);
     text.textContent = linkText;
 
     return text;
+  };
+
+  // Event Handlers
+  const onClickImgButton = evt => {
+    const text = evt.target
+      .parentElement
+      .querySelector(SPAN)
+      ?.textContent || EMPTY;
+
+    copyAction(text);
+  };
+
+  const onClickCloseButton = evt => {
+    const item = evt.target
+      .parentElement;
+    const parent = item.parentElement;
+    const imageWrapper = item.querySelector(COPY_BUTTON);
+    const closeWrapper = item.querySelector(REMOVE_BUTTON);
+    imageWrapper.removeEventListener(CLICK, onClickImgButton);
+    closeWrapper.removeEventListener(CLICK, onClickCloseButton);
+    parent.removeChild(item);
+  };
+
+  const onTextClick = (evt) => {
+    evt.target.contentEditable = true;
+  };
+
+  const onTextBlur = (evt) => {
+    evt.target.contentEditable = false;
   };
 
   const createItemForList = (linkText, imageUrl) => {
     // HTML elements
     const text = getTextContainer(linkText);
     const imageBtn = getImageButton(imageUrl);
-    const item = document.createElement("li");
-    const imageWrapper = document.createElement("div");
-    const closeBtn = document.createElement("button");
-    const closeBtnContainer = document.createElement("div");
-    const closeWrapper = document.createElement("div");
+    const item = document.createElement(LI);
+    const imageWrapper = document.createElement(DIV);
+    const closeBtn = document.createElement(BUTTON);
+    const closeBtnContainer = document.createElement(DIV);
+    const closeWrapper = document.createElement(DIV);
 
     closeBtnContainer.appendChild(closeBtn);
 
@@ -126,27 +241,18 @@
     item.replaceChildren(imageWrapper, text, closeWrapper);
 
     // CSS styling
-    item.classList.add("row-link");
-    imageBtn.classList.add("tab-icon");
-    closeBtn.classList.add("close-button");
-    closeBtnContainer.classList.add("close-button-container");
-    imageWrapper.classList.add("button-wrapper");
-    closeWrapper.classList.add("button-wrapper");
-
-    // Event Handlers
-    const onClickImgButton = e => {
-      copyAction(text.textContent);
-    };
-
-    const onClickCloseButton = e => {
-      const parent = item.parentElement;
-      imageWrapper.removeEventListener(CLICK, onClickImgButton);
-      closeWrapper.removeEventListener(CLICK, onClickCloseButton);
-      parent.removeChild(item);
-    };
+    item.classList.add(ROW_LINK);
+    imageBtn.classList.add(TAB_ICON);
+    closeBtn.classList.add(CLOSE_BUTTON);
+    closeBtnContainer.classList.add(CLOSE_BUTTON_CONTAINER);
+    imageWrapper.classList.add(BUTTON_WRAPPER);
+    closeWrapper.classList.add(BUTTON_WRAPPER);
 
     imageWrapper.addEventListener(CLICK, onClickImgButton);
     closeWrapper.addEventListener(CLICK, onClickCloseButton);
+
+    text.addEventListener(CLICK, onTextClick);
+    text.addEventListener(BLUR, onTextBlur);
 
     // Prevent editting buttons elements and wrappers
     imageBtn.contentEditable = false;
@@ -163,8 +269,10 @@
     return item;
   };
 
+  // Storage methods wrapped in promises.
   const getStorage = (key) => {
     return new Promise(resolve => {
+      // [Chrome Specific] - [FireFox support]
       chrome.storage.sync.get(key, stored => {
         resolve(stored[key] || {});
       });
@@ -180,7 +288,8 @@
           ...item,
         }
       };
-  
+
+      // [Chrome Specific] - [FireFox support]
       chrome.storage.sync.set(updated, () => {
         resolve(updated);
       });
@@ -237,17 +346,18 @@
   };
 
   const getAllTextLinks = () => {
-    let text = "";
+    let text = EMPTY;
     document
-      .querySelectorAll(".row-link:not(.hide) span")
+      .querySelectorAll(VISIBLE_LINKS)
       .forEach((el) => {
-      const itemText = el.textContent || "";
+      const itemText = el.textContent || EMPTY;
 
-      // Prevent starting with break line
-      text = text ? `${text}\n${itemText}` : itemText;
+      // Prevent adding break lines if item has no content
+      text = itemText ? `${text}\n${itemText}` : text;
     });
 
-    return text;
+    // Remove leading '\n'
+    return text.substring(1);
   }
 
   const copyHandler = () => {
@@ -256,7 +366,7 @@
   };
   
   const getLinksHandler = async () => {
-    const list = document.createElement("ul");
+    const list = document.createElement(UL);
     const forEachTab = tab => {
       const { url, favIconUrl } = tab;
       const item = formatLink(url, favIconUrl);
@@ -298,15 +408,27 @@
     getLinksHandler();
   };
 
+  // Remove content editable if there is nore more items
+  const enableContentEditable = (mutationList, observer) => {
+
+    // Enable if there are items left and they are visible
+    const enableEdit = !!document
+      .querySelectorAll(VISIBLE_ROWS).length
+
+    txtArea.setAttribute(EDITABLE, enableEdit);
+  };
+
   const searchHandler = () => {
     const input = searchBox.value;
     if (!input || input.length === 0) {
       setAllVisible();
+      // enableContentEditable();
 
       return;
     }
 
     filterItems(input);
+    // enableContentEditable();
   };
 
   const debouncedSearch = () => {
@@ -323,17 +445,7 @@
   const setObserverTxtArea = () => {
     const config = { childList: true, subtree: true };
 
-    // Remove content editable if there is nore more items
-    const callback = (mutationList, observer) => {
-      // TODO: Fix bug if all items are hidden from result
-      // text area will still be editable.
-      txtArea.setAttribute(
-        "contenteditable",
-        !!txtArea.children?.[0]?.childElementCount,
-      );
-    };
-
-    const observer = new MutationObserver(callback);
+    const observer = new MutationObserver(enableContentEditable);
 
     observer.observe(txtArea, config);
   };
@@ -343,7 +455,7 @@
     allWindowsCheckbox.checked = !!checked;
 
     getLinksHandler();
-    setObserverTxtArea();
+    // setObserverTxtArea();
   };
 
   const loadListeners = () => {

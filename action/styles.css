@@ -178,6 +178,12 @@ body {
   cursor: pointer;
 }
 
+/* Delegate all event to button-wrapper */
+.button-wrapper > * {
+  pointer-events: none;
+  cursor: pointer;
+}
+
 .button-wrapper:hover {
   background: var(--light-theme-btn-wrapper-hover);
 }
