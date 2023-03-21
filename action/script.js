@@ -26,6 +26,7 @@
   const defaultIcon = "../img/question.png";
   // Constants
   const [
+    BLUR,
     CLICK,
     LOAD,
     ERROR,
@@ -41,6 +42,7 @@
     EMPTY,
     EDITABLE,
   ] = [
+    "blur",
     "click",
     "load",
     "error",
@@ -61,10 +63,14 @@
     ALL_ROWS,
     VISIBLE_ROWS,
     VISIBLE_LINKS,
+    COPY_BUTTON,
+    REMOVE_BUTTON,
   ] = [
     ".row-link",
     ".row-link:not(.hide)",
-    ".row-link:not(.hide) span"
+    ".row-link:not(.hide) span",
+    ".button-wrapper:first-child",
+    ".button-wrapper:last-child",
   ];
   // CSS Clases
   const [
@@ -188,6 +194,35 @@
     return text;
   };
 
+  // Event Handlers
+  const onClickImgButton = evt => {
+    const text = evt.target
+      .parentElement
+      .querySelector(SPAN)
+      ?.textContent || EMPTY;
+
+    copyAction(text);
+  };
+
+  const onClickCloseButton = evt => {
+    const item = evt.target
+      .parentElement;
+    const parent = item.parentElement;
+    const imageWrapper = item.querySelector(COPY_BUTTON);
+    const closeWrapper = item.querySelector(REMOVE_BUTTON);
+    imageWrapper.removeEventListener(CLICK, onClickImgButton);
+    closeWrapper.removeEventListener(CLICK, onClickCloseButton);
+    parent.removeChild(item);
+  };
+
+  const onTextClick = (evt) => {
+    evt.target.contentEditable = true;
+  };
+
+  const onTextBlur = (evt) => {
+    evt.target.contentEditable = false;
+  };
+
   const createItemForList = (linkText, imageUrl) => {
     // HTML elements
     const text = getTextContainer(linkText);
@@ -213,20 +248,11 @@
     imageWrapper.classList.add(BUTTON_WRAPPER);
     closeWrapper.classList.add(BUTTON_WRAPPER);
 
-    // Event Handlers
-    const onClickImgButton = e => {
-      copyAction(text.textContent);
-    };
-
-    const onClickCloseButton = e => {
-      const parent = item.parentElement;
-      imageWrapper.removeEventListener(CLICK, onClickImgButton);
-      closeWrapper.removeEventListener(CLICK, onClickCloseButton);
-      parent.removeChild(item);
-    };
-
     imageWrapper.addEventListener(CLICK, onClickImgButton);
     closeWrapper.addEventListener(CLICK, onClickCloseButton);
+
+    text.addEventListener(CLICK, onTextClick);
+    text.addEventListener(BLUR, onTextBlur);
 
     // Prevent editting buttons elements and wrappers
     imageBtn.contentEditable = false;
@@ -384,6 +410,7 @@
 
   // Remove content editable if there is nore more items
   const enableContentEditable = (mutationList, observer) => {
+
     // Enable if there are items left and they are visible
     const enableEdit = !!document
       .querySelectorAll(VISIBLE_ROWS).length
@@ -395,13 +422,13 @@
     const input = searchBox.value;
     if (!input || input.length === 0) {
       setAllVisible();
-      enableContentEditable();
+      // enableContentEditable();
 
       return;
     }
 
     filterItems(input);
-    enableContentEditable();
+    // enableContentEditable();
   };
 
   const debouncedSearch = () => {
@@ -428,7 +455,7 @@
     allWindowsCheckbox.checked = !!checked;
 
     getLinksHandler();
-    setObserverTxtArea();
+    // setObserverTxtArea();
   };
 
   const loadListeners = () => {
