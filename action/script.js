@@ -254,12 +254,6 @@
     text.addEventListener(CLICK, onTextClick);
     text.addEventListener(BLUR, onTextBlur);
 
-    // Prevent editting buttons elements and wrappers
-    imageBtn.contentEditable = false;
-    closeBtn.contentEditable = false;
-    imageWrapper.contentEditable = false;
-    closeWrapper.contentEditable = false;
-
     return { item, imageBtn, text, closeBtn, imageWrapper, closeWrapper };
   };
 
