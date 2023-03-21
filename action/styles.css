@@ -123,6 +123,11 @@ body {
   align-items: center;
 }
 
+.row-link span:focus-visible {
+  outline: dotted;
+  outline-color: var(--light-theme-button-hover);
+}
+
 .row-link .tab-icon {
   letter-spacing: unset;
   word-spacing: unset;
@@ -335,6 +340,9 @@ body {
   .search-box:focus-visible {
     outline-color: var(--light-theme-button-hover);
   }
+  .row-link span:focus-visible {
+    outline-color: var(--light-theme-button-hover);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -378,6 +386,9 @@ body {
     background: var(--dark-theme-scroll-background);
   }
   .search-box:focus-visible {
+    outline-color: var(--dark-theme-button-hover);
+  }
+  .row-link span:focus-visible {
     outline-color: var(--dark-theme-button-hover);
   }
 }
