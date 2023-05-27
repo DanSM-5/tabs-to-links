@@ -1,0 +1,25 @@
+{
+  "name": "tabs-to-links",
+  "version": "1.0.5",
+  "description": "List the urls of the open tabs in the browser",
+  "main": "script.js",
+  "scripts": {
+    "version": "npx auto-changelog -p && git add CHANGELOG.md",
+    "set-shell": "./helpers/testShell.sh || node helpers/setShell.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github-personal/DanSM-5/tabs-to-links.git"
+  },
+  "keywords": [
+    "extension",
+    "url-lists"
+  ],
+  "auto-changelog": {
+    "commitLimit": false,
+    "sortCommits": "date-desc",
+    "template": "keepachangelog"
+  },
+  "author": "EDSM",
+  "license": "ISC"
+}

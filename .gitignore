@@ -1,0 +1,7 @@
+# Builds
+dist/
+tmp/
+
+# Dev Environment
+.npmrc
+.env
