@@ -11,6 +11,10 @@ DIST_PATH="dist"
 DATE="$(date +'%d-%m-%YT%H:%M:%S:%3N')"
 BUILD="$DIST_PATH/${browser}_v${VERSION}_${DATE}.zip"
 
+if ! [ -f "manifests/$MANIFEST" ]; then
+  echo "Browser "$browser" not supported for build."
+fi
+
 # Remove existing build directory
 [ -d "$BUILD_PATH" ] && rm -rf "$BUILD_PATH"
 
@@ -32,4 +36,5 @@ if ! command -v zip; then
   exit 0
 fi
 
-zip -r -FS "$BUILD" "$BUILD_PATH"
+pushd "$BUILD_PATH"
+zip -r -FS "../../$BUILD" *
