@@ -1,0 +1,19 @@
+{
+  "name": "Tabs 2 Links",
+  "description": "Get the urls of all the current open tabs in a list",
+  "version": "{{VERSION}}",
+  "manifest_version": 2,
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "browser_action": {
+    "default_popup": "action/index.html",
+    "browser_style": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "daniel@sm.com"
+    }
+  }
+}
