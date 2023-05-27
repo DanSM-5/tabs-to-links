@@ -167,6 +167,10 @@ body {
   background-size: cover;
 }
 
+.row-link:nth-child(2n + 1) {
+  background: var(--light-theme-odds);
+}
+
 .row-link:nth-child(2n + 1 of :not(.hide)) {
   background: var(--light-theme-odds);
 }
@@ -312,6 +316,9 @@ body {
     background-color: var(--light-theme);
     color: var(--light-theme-text);
   }
+  .row-link:nth-child(2n + 1) {
+    background: var(--light-theme-odds);
+  }
   .row-link:nth-child(2n + 1 of :not(.hide)) {
     background: var(--light-theme-odds);
   }
@@ -365,6 +372,9 @@ body {
   body {
     background-color: var(--dark-theme);
     color: var(--dark-theme-text);
+  }
+  .row-link:nth-child(2n + 1) {
+    background: var(--dark-theme-odds);
   }
   .row-link:nth-child(2n + 1 of :not(.hide)) {
     background: var(--dark-theme-odds);
