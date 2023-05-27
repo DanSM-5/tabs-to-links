@@ -450,7 +450,7 @@
     }
 
     const link = document.createElement(A);
-    const date = (new Date()).toISOString();
+    const date = (new Date()).toISOString().replace(/:/gi, '-');
 
     link.download = `links-${date}.txt`;
     link.href = `${DOWNLOAD_MIME}${encodeURIComponent(text)}`;
