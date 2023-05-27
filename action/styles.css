@@ -160,11 +160,11 @@ body {
   background-size: cover;
 }
 
-.row-link:nth-child(2n+1) {
+.row-link:nth-child(2n + 1 of :not(.hide)) {
   background: var(--light-theme-odds);
 }
 
-.row-link:hover {
+.row-link:not(.hide):hover {
   background-color: var(--light-theme-hover);
 }
 
@@ -305,10 +305,10 @@ body {
     background-color: var(--light-theme);
     color: var(--light-theme-text);
   }
-  .row-link:nth-child(2n+1) {
+  .row-link:nth-child(2n + 1 of :not(.hide)) {
     background: var(--light-theme-odds);
   }
-  .row-link:hover {
+  .row-link:not(.hide):hover {
     background-color: var(--light-theme-hover);
   }
   .btn {
@@ -365,10 +365,10 @@ body {
     background-color: var(--dark-theme);
     color: var(--dark-theme-text);
   }
-  .row-link:nth-child(2n+1) {
+  .row-link:nth-child(2n + 1 of :not(.hide)) {
     background: var(--dark-theme-odds);
   }
-  .row-link:hover {
+  .row-link:not(.hide):hover {
     background-color: var(--dark-theme-hover);
   }
   .btn {
