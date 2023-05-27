@@ -114,9 +114,11 @@
   const BROWSER_CSS_VARIABLES = {
     [CHROME]: [
       "--txt-box-width: 400px;",
+      "--list-right-padding: 0",
     ],
     [FIREFOX]: [
       "--txt-box-width: 340px;",
+      "--list-right-padding: 10px",
     ],
   };
 
