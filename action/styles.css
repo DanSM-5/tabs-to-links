@@ -88,7 +88,7 @@ body {
 .txt-box ul {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--list-right-padding) 0 0;
   overflow-y: scroll;
   max-height: 350px;
 
