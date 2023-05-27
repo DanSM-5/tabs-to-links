@@ -19,7 +19,7 @@
   const searchBox = document.querySelector("#search-box");
   const searchBtn = document.querySelector("#search-btn");
   const resetBtn = document.querySelector("#reset-btn");
-  const cleanBtn = document.querySelector("#clean-btn");
+  const downloadBtn = document.querySelector("#download-btn");
   const copyBtn = document.querySelector("#copy-btn");
   const txtArea = document.querySelector("#txt-box");
   const TAG = "[Tabs2Links]";
@@ -39,8 +39,10 @@
     DIV,
     LI,
     UL,
+    A,
     EMPTY,
     EDITABLE,
+    DOWNLOAD_MIME,
   ] = [
     "blur",
     "click",
@@ -55,8 +57,10 @@
     "div",
     "li",
     "ul",
+    "a",
     "",
     "contenteditable",
+    "data:text/plain;charset=utf-8," 
   ];
   // CSS Selectors
   const [
@@ -150,6 +154,10 @@
   };
 
   const copyAction = async string => {
+    if (!string) {
+      return
+    }
+
     try {
       await navigator.clipboard.writeText(string);
     } catch (error) {
@@ -385,8 +393,19 @@
     txtArea.replaceChildren(list);
   };
   
-  const cleanHandler = () => {
-    txtArea.replaceChildren();
+  const downloadHandler = () => {
+    const text = getAllTextLinks();
+    
+    if (!text) {
+      return;
+    }
+
+    const link = document.createElement(A);
+    const date = (new Date()).toISOString();
+
+    link.download = `links-${date}.txt`;
+    link.href = `${DOWNLOAD_MIME}${encodeURIComponent(text)}`;
+    link.click();
   };
 
   const checkAllWindowsHandler = () => {
@@ -457,7 +476,7 @@
     searchBtn.addEventListener(CLICK, searchHandler);
     allWindowsBtn.addEventListener(CLICK, checkAllWindowsHandler);
     resetBtn.addEventListener(CLICK, getLinksHandler);
-    cleanBtn.addEventListener(CLICK, cleanHandler);
+    downloadBtn.addEventListener(CLICK, downloadHandler);
     copyBtn.addEventListener(CLICK, copyHandler);
     window.addEventListener(LOAD, onWindowsLoad);
   };
