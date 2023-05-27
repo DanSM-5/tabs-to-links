@@ -32,6 +32,10 @@
     CLICK,
     LOAD,
     ERROR,
+    WARN,
+    INFO,
+    LOG,
+    DEBUG,
     HIDE,
     REMOVE,
     ADD,
@@ -53,6 +57,10 @@
     "click",
     "load",
     "error",
+    'warn',
+    'info',
+    'log',
+    'debug',
     "hide",
     "remove",
     "add",
@@ -113,6 +121,16 @@
   };
 
   let searchTimer = UNSET_TIMER_REF;
+
+  const { error, warn, info, log, debug } = (() => {
+    return [ERROR, WARN, INFO, LOG, DEBUG].reduce((logger, stream) => {
+      logger[stream] = (message, ...rest) => {
+        console[stream](`${TAG}: ${message}`, ...rest);
+      };
+
+      return logger;
+    }, {});
+  })();
 
   const BROWSER = (() => {
     const userAgent = navigator.userAgent.toLocaleLowerCase();
@@ -210,7 +228,7 @@
     try {
       await navigator.clipboard.writeText(string);
     } catch (error) {
-      console.warn(`${TAG} Unable to copy text in clipboard.`);
+      warn('Unable to copy text in clipboard.');
     }
   }
 
@@ -462,7 +480,7 @@
 
     setStorage(STORAGE.CONFIG, { checked })
       .catch(e => {
-        console.error(`${TAG} State could not be saved`);
+        error('State could not be saved');
       });
 
     allWindowsCheckbox.checked = checked;
