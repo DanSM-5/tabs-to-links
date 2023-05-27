@@ -1,6 +1,6 @@
 {
   "name": "tabs-to-links",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "List the urls of the open tabs in the browser",
   "main": "script.js",
   "scripts": {
