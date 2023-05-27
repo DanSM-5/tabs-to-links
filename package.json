@@ -5,7 +5,8 @@
   "main": "script.js",
   "scripts": {
     "version": "npx auto-changelog -p && git add CHANGELOG.md",
-    "set-shell": "./helpers/testShell.sh || node helpers/setShell.js"
+    "set-shell": "./helpers/testShell.sh || node helpers/setShell.js",
+    "build": "./helpers/build.sh"
   },
   "repository": {
     "type": "git",
