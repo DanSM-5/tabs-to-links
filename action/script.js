@@ -24,6 +24,8 @@
   const txtArea = document.querySelector("#txt-box");
   const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
+  const DEBOUNCE_SEARCH_MS = 300;
+  const UNSET_TIMER_REF = -1;
   // Constants
   const [
     BLUR,
@@ -40,6 +42,9 @@
     LI,
     UL,
     A,
+    STYLE,
+    CHROME,
+    FIREFOX,
     EMPTY,
     EDITABLE,
     DOWNLOAD_MIME,
@@ -58,6 +63,9 @@
     "li",
     "ul",
     "a",
+    "style",
+    "chrome",
+    "firefox",
     "",
     "contenteditable",
     "data:text/plain;charset=utf-8," 
@@ -94,9 +102,50 @@
   const STORAGE = {
     CONFIG: "config",
   };
+  // Browser Specific
+  const BROWSER_CSS_VARIABLES = {
+    [CHROME]: [
+      "--txt-box-width: 400px;",
+    ],
+    [FIREFOX]: [
+      "--txt-box-width: 340px;",
+    ],
+  };
 
-  let searchTimer = -1;
+  let searchTimer = UNSET_TIMER_REF;
 
+  const BROWSER = (() => {
+    const userAgent = navigator.userAgent.toLocaleLowerCase();
+
+    if (userAgent.indexOf(CHROME) !== -1) {
+      return CHROME;
+    } else if(userAgent.indexOf(FIREFOX) !== -1) {
+      return FIREFOX
+    }
+
+    // TODO: Check support with other chromium browsers.
+    // Use lowest supported option.
+    return FIREFOX;
+  })();
+
+  const addCssStyle = (style) => {
+    const cssStyle = document.createElement(STYLE);
+
+    cssStyle.textContent = style;
+    document.head.append(cssStyle);
+  };
+
+  const setBrowserSpecificStyles = () => {
+    const browserVars = BROWSER_CSS_VARIABLES[BROWSER];
+
+    const stylesString = browserVars.reduce((curr, style) => {
+      return `${curr}${style}`;
+    }, EMPTY);
+
+    const styles = `:root {${stylesString}}`;
+
+    addCssStyle(styles);
+  };
   // TODO: Add message for no results?
   // TODO: Need to improve search. Add basic search.
   // Regex will do for now.
@@ -445,14 +494,14 @@
   };
 
   const debouncedSearch = () => {
-    if (searchTimer !== -1) {
+    if (searchTimer !== UNSET_TIMER_REF) {
       clearTimeout(searchTimer);
     }
 
     searchTimer = setTimeout(() => {
-      searchTimer = -1;
+      searchTimer = UNSET_TIMER_REF;
       searchHandler();
-    }, 300);
+    }, DEBOUNCE_SEARCH_MS);
   };
 
   const setObserverTxtArea = () => {
@@ -467,6 +516,7 @@
     const { checked } = await getStorage(STORAGE.CONFIG);
     allWindowsCheckbox.checked = !!checked;
 
+    setBrowserSpecificStyles();
     getLinksHandler();
     // setObserverTxtArea();
   };
