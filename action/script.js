@@ -113,11 +113,11 @@
   // Browser Specific
   const BROWSER_CSS_VARIABLES = {
     [CHROME]: [
-      "--txt-box-width: 400px;",
+      "--txt-box-width: 400px",
       "--list-right-padding: 0",
     ],
     [FIREFOX]: [
-      "--txt-box-width: 340px;",
+      "--txt-box-width: 340px",
       "--list-right-padding: 10px",
     ],
   };
@@ -158,9 +158,7 @@
   const setBrowserSpecificStyles = () => {
     const browserVars = BROWSER_CSS_VARIABLES[BROWSER];
 
-    const stylesString = browserVars.reduce((curr, style) => {
-      return `${curr}${style}`;
-    }, EMPTY);
+    const stylesString = browserVars.join(';');
 
     const styles = `:root {${stylesString}}`;
 
