@@ -3,15 +3,16 @@
 [[ -v debug ]] && set -x
 
 browser="$1"
-MANIFEST="$browser.json"
+BROWSER_MANIFEST="$browser.json"
+MANIFEST="manifest.json"
 VERSION=$(sed -nr "s/.*version.*\"([0-9]+\.[0-9]+\.[0-9]+)\".*/\1/p" package.json)
 TEMP="tmp"
 BUILD_PATH="$TEMP/$browser"
 DIST_PATH="dist"
-DATE="$(date +'%d-%m-%YT%H:%M:%S:%3N')"
+DATE="$(date +'%d-%m-%YT%H-%M-%S-%3N')"
 BUILD="$DIST_PATH/${browser}_v${VERSION}_${DATE}.zip"
 
-if ! [ -f "manifests/$MANIFEST" ]; then
+if ! [ -f "manifests/$BROWSER_MANIFEST" ]; then
   echo "Browser "$browser" not supported for build."
 fi
 
@@ -24,7 +25,7 @@ mkdir -p "$DIST_PATH"
 # Copy required files
 cp -r action "$BUILD_PATH"
 cp -r img "$BUILD_PATH"
-cp "manifests/$MANIFEST" "$BUILD_PATH"
+cp "manifests/$BROWSER_MANIFEST" "$BUILD_PATH/$MANIFEST"
 
 sed -r -i'.bak' -e "s/\{\{VERSION\}\}/$VERSION/g" "$BUILD_PATH/$MANIFEST"
 
