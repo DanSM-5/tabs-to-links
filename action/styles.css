@@ -37,6 +37,7 @@ body {
   flex-direction: column;
   font-size: 1rem;
   box-sizing: border-box;
+  width: 500px;
 }
 
 #search-wrapper {
@@ -72,8 +73,8 @@ body {
 }
 
 .txt-box {
-  width: var(--txt-box-width);
-  max-width: var(--txt-box-width);
+  /* width: var(--txt-box-width);
+  max-width: var(--txt-box-width); */
   height: 350px;
 
   /* FIREFOX */
@@ -88,7 +89,7 @@ body {
 .txt-box ul {
   list-style: none;
   margin: 0;
-  padding: 0 var(--list-right-padding) 0 0;
+  padding: 0 var(--list-right-padding) 0 3px;
   overflow-y: scroll;
   max-height: 350px;
 
@@ -190,7 +191,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 35px;
+  width: 45px;
   cursor: pointer;
 }
 
