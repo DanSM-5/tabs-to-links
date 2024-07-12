@@ -23,5 +23,8 @@
     "template": "keepachangelog"
   },
   "author": "EDSM",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chrome": "^0.0.268"
+  }
 }
