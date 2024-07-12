@@ -71,7 +71,7 @@
   const SOME = 'some';
   // Placeholder content
   const SEARCH_BY_REGEXP = 'Search using regex';
-  const SEARCH_BY_TEXT = 'Search typing';
+  const SEARCH_BY_TEXT = 'Search text';
   // Storage keys
   /**
    * @typedef {{
@@ -208,19 +208,10 @@
 
     document.querySelectorAll(ALL_ROWS).forEach(item => {
       const text = item.querySelector(SPAN)?.textContent || '';
+      const shouldHide = terms[arrayMethod](term => text.includes(term)) === isNegative;
       // NOTE: Method adds or removes the 'hide' class
       // so initial remove means all are visible by default
-      let classMethod = REMOVE;
-      try {
-        if (!terms[arrayMethod](term => text.includes(term))) {
-          classMethod = ADD;
-        }
-      } catch (e) {
-        error('[FilterSimple] Error matching term:', text, e);
-        // Fallback to show
-        classMethod = REMOVE;
-      }
-
+      const classMethod = shouldHide ? ADD : REMOVE;
       item.classList[classMethod](HIDE);
     });
   };
@@ -269,7 +260,7 @@
     try {
       searchPattern = new RegExp(query);
     } catch (e) {
-      error('[FilterRegexp] Error creating regexp:', e);
+      debug('[FilterRegexp] Error creating regexp:', e);
       // No assingning fallback to searchPattern to use
       // fallback with includes
     }
