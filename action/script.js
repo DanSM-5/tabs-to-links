@@ -18,6 +18,8 @@
   // HTML Elements
   const allWindowsCheckbox = /** @type {HTMLInputElement} */ (document.querySelector('#all-windows'));
   const allWindowsBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#all-windows-btn'));
+  const useRegexpCheckbox = /** @type {HTMLInputElement} */ (document.querySelector('#use-regexp'));
+  const useRegexpBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#use-regexp-btn'));
   const searchBox = /** @type {HTMLInputElement} */ (document.querySelector('#search-box'));
   const searchBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#search-btn'));
   const resetBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#reset-btn'));
@@ -436,7 +438,12 @@
   };
 
   // Storage methods wrapped in promises.
-  /** @typedef {{ checked: boolean }} Config */
+  /**
+   * @typedef {{
+   *   allWindows: boolean;
+   *   useRegexp: boolean;
+   * }} Config
+   */
   /**
    * Type of the object stored in storage.sync
    * @typedef {{
@@ -445,7 +452,7 @@
    */
 
   /**
-   * @param {StorageKeys} key 
+   * @param {StorageKeys} key
    * @returns {Promise<SyncStorage[StorageKeys]>}
    */
   const getStorage = (key) => {
@@ -461,7 +468,7 @@
    * @template T
    * @param {StorageKeys} key Key to add or update
    * @param {T} item Item to store
-   * @returns {Promise<{ [typeof key]: T }>}
+   * @returns {Promise<{ [k in key]: T }>}
    */
   const setStorage = (key, item) => {
     return new Promise(async resolve => {
@@ -481,7 +488,7 @@
   };
 
   /**
-   * 
+   *
    * @param {(tab: chrome.tabs.Tab, index: number) => any} callback Callback function
    * @returns {Promise<void>}
    */
@@ -503,7 +510,7 @@
   };
 
   /**
-   * 
+   *
    * @param {(tab: chrome.tabs.Tab, index: number) => any} callback Callback function
    * @returns {Promise<void>}
    */
@@ -620,16 +627,31 @@
     link.click();
   };
 
-  const checkAllWindowsHandler = () => {
-    const checked = !allWindowsCheckbox.checked;
+  const toggleRegexpConfigHandler = () => {
+    const useRegexp = !useRegexpCheckbox.checked;
 
-    setStorage(STORAGE.CONFIG, { checked })
+    setStorage(STORAGE.CONFIG, { useRegexp })
       .catch(e => {
-        error('State could not be saved');
+        error('[Storage] Error updating config.useRegexp to:', useRegexp, e);
       });
 
-    allWindowsCheckbox.checked = checked;
+    useRegexpCheckbox.checked = useRegexp;
 
+    // Need to update the search
+    searchHandler();
+  }
+
+  const checkAllWindowsHandler = () => {
+    const allWindows = !allWindowsCheckbox.checked;
+
+    setStorage(STORAGE.CONFIG, { allWindows })
+      .catch(e => {
+        error('[Storage] Error updating config.allWindows to:', allWindows, e);
+      });
+
+    allWindowsCheckbox.checked = allWindows;
+
+    // Need to update the list
     getLinksHandler();
   };
 
@@ -660,11 +682,18 @@
       return;
     }
 
-    filterItemsByRegexp(input);
-    // filterItemsSimple(input);
-    // enableContentEditable();
+    if (useRegexpCheckbox.checked) {
+      filterItemsByRegexp(input);
+    } else {
+      filterItemsSimple(input);
+    }
   };
 
+  /**
+   * Wrapper for search handler but debounced to prevent spamming
+   * the function while typing.
+   * @returns {void}
+   */
   const debouncedSearch = () => {
     if (searchTimer !== UNSET_TIMER_REF) {
       clearTimeout(searchTimer);
@@ -685,8 +714,9 @@
   };
 
   const onWindowsLoad = async () => {
-    const { checked } = await getStorage(STORAGE.CONFIG);
-    allWindowsCheckbox.checked = !!checked;
+    const { allWindows, useRegexp } = await getStorage(STORAGE.CONFIG);
+    allWindowsCheckbox.checked = !!allWindows;
+    useRegexpCheckbox.checked = !!useRegexp;
 
     setBrowserSpecificStyles();
     getLinksHandler();
@@ -697,6 +727,7 @@
     searchBox.addEventListener(KEYUP, debouncedSearch);
     searchBtn.addEventListener(CLICK, searchHandler);
     allWindowsBtn.addEventListener(CLICK, checkAllWindowsHandler);
+    useRegexpBtn.addEventListener(CLICK, toggleRegexpConfigHandler);
     resetBtn.addEventListener(CLICK, getLinksHandler);
     downloadBtn.addEventListener(CLICK, downloadHandler);
     copyBtn.addEventListener(CLICK, copyHandler);
