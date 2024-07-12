@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "ESNext",
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types/*.d.ts"
+    ]
+  },
+  "include": [
+    "./action/**/*"
+  ]
+}
