@@ -154,6 +154,10 @@
     return FIREFOX;
   })();
 
+  /**
+   * Add styles to the document by appending a style tag.
+   * @param {string} style Styles to append to the document 
+   */
   const addCssStyle = (style) => {
     const cssStyle = document.createElement(STYLE);
 
@@ -161,6 +165,10 @@
     document.head.append(cssStyle);
   };
 
+  /**
+   * Append the set of variables to fix differences between
+   * firefox and chromium browsers
+   */
   const setBrowserSpecificStyles = () => {
     const browserVars = BROWSER_CSS_VARIABLES[BROWSER];
 
@@ -192,6 +200,7 @@
     if (isAnd && isOr) {
       // This requires grouping which is better suited for regex
       // version of the matching.
+      warn('[FilterSimple] Cannot evaluate "and" and "or" expression');
       return;
     }
 
@@ -207,18 +216,21 @@
     }
 
     document.querySelectorAll(ALL_ROWS).forEach(item => {
-      const text = item.querySelector(SPAN)?.textContent || '';
-      const shouldHide = terms[arrayMethod](term => text.includes(term)) === isNegative;
-      // NOTE: Method adds or removes the 'hide' class
-      // so initial remove means all are visible by default
-      const classMethod = shouldHide ? ADD : REMOVE;
-      item.classList[classMethod](HIDE);
+      try {
+        const text = item.querySelector(SPAN)?.textContent || '';
+        const shouldHide = terms[arrayMethod](term => text.includes(term)) === isNegative;
+        // NOTE: Method adds or removes the 'hide' class
+        // so initial remove means all are visible by default
+        const classMethod = shouldHide ? ADD : REMOVE;
+        item.classList[classMethod](HIDE);
+      } catch (e) {
+        // Should not arrive here
+        error('[FilterSimple] Error evaluating text:', e);
+      }
     });
   };
 
   // TODO: Add message for no results?
-  // TODO: Need to improve search. Add basic search.
-  // Regex will do for now.
   /**
    * Mark rows that match query visible
    * and rows that don't hidden.
@@ -228,60 +240,34 @@
    * @returns {void}
    */
   const filterItemsByRegexp = (query) => {
-    // Regex
-    // Exceptions: SyntaxError
-    // Thrown if one of the following is true:
-    // > pattern cannot be parsed as a valid regular expression.
-    // > flags contains repeated characters or any character outside of those allowed.
-    // Src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp
-
-    // TODO: Investigate if error is at instantiation time (e.g. new Regex(query))
-    // or when using the object (e.g. someRegex.test(text)).
-    // The below snipet could be a better abstraction and avoid continues exceptions
-    // but it will only work if the exception is during instantiation.
-    // The current approach is better for the later but generally safer.
-
-    // let isMatchingText;
-
-    // try {
-    //   const searchPattern = new RegExp(query);
-
-    //   isMatchingText = (content) => searchPattern.test(content);
-    // } catch (error) {
-    //   isMatchingText = (content) => content.includes(query);
-    // }
-
-    // const method = isMatchingText(text.textContent)
-    //   ? REMOVE // Remove .hide class
-    //   : ADD // Add .hide class
-
     /** @type {RegExp} */
     let searchPattern;
+    /** @type {(text: string) => boolean} */
+    let isValid = (text) => searchPattern.test(text);
     try {
       searchPattern = new RegExp(query);
     } catch (e) {
+      // If it comes here, there is probably a SyntaxError
+      // when attempting to create the regexp
+      // Thrown if one of the following is true:
+      // > pattern cannot be parsed as a valid regular expression.
+      // > flags contains repeated characters or any character outside of those allowed.
+      // Src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp
       debug('[FilterRegexp] Error creating regexp:', e);
-      // No assingning fallback to searchPattern to use
-      // fallback with includes
+      isValid = (text) => text.includes(query);
     }
 
     document.querySelectorAll(ALL_ROWS).forEach(item => {
-      const text = item.querySelector(SPAN)?.textContent || '';
-      // NOTE: Method adds or removes the 'hide' class
-      // so initial remove means all are visible by default
-      let classMethod = REMOVE;
       try {
-        if (!searchPattern.test(text)) {
-          classMethod = ADD;
-        }
-
-      } catch (error) {
-        if (!text.includes(query)) {
-          classMethod = ADD;
-        }
+        const text = item.querySelector(SPAN)?.textContent || '';
+        // NOTE: Method adds or removes the 'hide' class
+        // so initial remove means all are visible by default
+        const classMethod = isValid(text) ? REMOVE : ADD;
+        item.classList[classMethod](HIDE);
+      } catch (e) {
+        // Should not arrive here
+        error('[FilterRegexp] Error evaluating text:', e);
       }
-
-      item.classList[classMethod](HIDE);
     });
   };
 
