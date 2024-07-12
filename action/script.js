@@ -1,4 +1,3 @@
-
 // @ts-check
 
 // Cases where the chrome object is used it preceded by the comment:
@@ -67,6 +66,12 @@
   const CLOSE_BUTTON = 'close-button';
   const CLOSE_BUTTON_CONTAINER = 'close-button-container';
   const BUTTON_WRAPPER = 'button-wrapper';
+  // Array Methods
+  const EVERY = 'every';
+  const SOME = 'some';
+  // Placeholder content
+  const SEARCH_BY_REGEXP = 'Search using regex';
+  const SEARCH_BY_TEXT = 'Search typing';
   // Storage keys
   /**
    * @typedef {{
@@ -172,7 +177,6 @@
    * This uses simple string matching with the rules:
    * - "&" or (has to match all terms separated by ampersand)
    * - "|" and (has to match at least one term separated by pipe)
-   * - "`" xor (has to match one and only one)
    * - "^" not (negates the matching expression)
    *
    * @param {string} query String to match against
@@ -180,7 +184,7 @@
    */
   const filterItemsSimple = (query) => {
     const isNegative = query.startsWith('^');
-    let cleanQuery = isNegative ? query.substring(1) : query;
+    const cleanQuery = isNegative ? query.substring(1) : query;
     const isAnd = cleanQuery.includes('&');
     const isOr = cleanQuery.includes('|');
     // const isPlain = !isAnd && !isOr;
@@ -191,22 +195,24 @@
       return;
     }
 
-    let /** @type {'every' | 'some'} */ arrayMethod;
+    let /** @type {EVERY | SOME} */ arrayMethod;
     let /** @type {string[]} */ terms;
 
     if (isAnd) {
       terms = cleanQuery.split('&');
-      arrayMethod = 'every';
+      arrayMethod = EVERY;
     } else {
       terms = cleanQuery.split('|');
-      arrayMethod = 'some';
+      arrayMethod = SOME;
     }
 
     document.querySelectorAll(ALL_ROWS).forEach(item => {
       const text = item.querySelector(SPAN)?.textContent || '';
+      // NOTE: Method adds or removes the 'hide' class
+      // so initial remove means all are visible by default
       let classMethod = REMOVE;
       try {
-        if (terms[arrayMethod](term => term.includes(text))) {
+        if (!terms[arrayMethod](term => text.includes(term))) {
           classMethod = ADD;
         }
       } catch (e) {
@@ -640,6 +646,14 @@
     link.click();
   };
 
+  const updatePlaceholder = () => {
+    if (useRegexpCheckbox.checked) {
+      searchBox.placeholder = SEARCH_BY_REGEXP;
+    } else {
+      searchBox.placeholder = SEARCH_BY_TEXT;
+    }
+  }
+
   const toggleRegexpConfigHandler = () => {
     const useRegexp = !useRegexpCheckbox.checked;
 
@@ -652,6 +666,7 @@
 
     // Need to update the search
     searchHandler();
+    updatePlaceholder();
   }
 
   const checkAllWindowsHandler = () => {
@@ -733,6 +748,7 @@
 
     setBrowserSpecificStyles();
     getLinksHandler();
+    updatePlaceholder();
     // setObserverTxtArea();
   };
 

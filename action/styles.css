@@ -50,8 +50,15 @@ body {
   display: flex;
   align-items: center;
   margin-left: 5px;
-  margin-right: 20px;
+  /* margin-right: 20px; */
   width: 100%;
+}
+
+#use-regexp-btn {
+  height: 30px;
+  margin: 5px 10px;
+  font-size: 0.7em;
+  width: 100px;
 }
 
 .logo-icon,
