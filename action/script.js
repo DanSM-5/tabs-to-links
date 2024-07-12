@@ -1,4 +1,6 @@
 
+// @ts-check
+
 // Cases where the chrome object is used it preceded by the comment:
 // [Chrome Specific] - [FireFox support]
 // This extension works fine in both browsers with minimal css differences.
@@ -14,124 +16,121 @@
 
 (_ => {
   // HTML Elements
-  const allWindowsCheckbox = document.querySelector("#all-windows");
-  const allWindowsBtn = document.querySelector("#all-windows-btn");
-  const searchBox = document.querySelector("#search-box");
-  const searchBtn = document.querySelector("#search-btn");
-  const resetBtn = document.querySelector("#reset-btn");
-  const downloadBtn = document.querySelector("#download-btn");
-  const copyBtn = document.querySelector("#copy-btn");
-  const txtArea = document.querySelector("#txt-box");
-  const TAG = "[Tabs2Links]";
-  const defaultIcon = "../img/question.png";
+  const allWindowsCheckbox = /** @type {HTMLInputElement} */ (document.querySelector('#all-windows'));
+  const allWindowsBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#all-windows-btn'));
+  const searchBox = /** @type {HTMLInputElement} */ (document.querySelector('#search-box'));
+  const searchBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#search-btn'));
+  const resetBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#reset-btn'));
+  const downloadBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#download-btn'));
+  const copyBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#copy-btn'));
+  const txtArea = /** @type {HTMLTextAreaElement} */ (document.querySelector('#txt-box'));
+  const TAG = '[Tabs2Links]';
+  const defaultIcon = '../img/question.png';
   const DEBOUNCE_SEARCH_MS = 300;
   const UNSET_TIMER_REF = -1;
   // Constants
-  const [
-    BLUR,
-    CLICK,
-    LOAD,
-    ERROR,
-    WARN,
-    INFO,
-    LOG,
-    DEBUG,
-    HIDE,
-    REMOVE,
-    ADD,
-    KEYUP,
-    SPAN,
-    BUTTON,
-    DIV,
-    LI,
-    UL,
-    A,
-    STYLE,
-    CHROME,
-    FIREFOX,
-    EMPTY,
-    EDITABLE,
-    DOWNLOAD_MIME,
-  ] = [
-    "blur",
-    "click",
-    "load",
-    "error",
-    'warn',
-    'info',
-    'log',
-    'debug',
-    "hide",
-    "remove",
-    "add",
-    "keyup",
-    "span",
-    "button",
-    "div",
-    "li",
-    "ul",
-    "a",
-    "style",
-    "chrome",
-    "firefox",
-    "",
-    "contenteditable",
-    "data:text/plain;charset=utf-8," 
-  ];
+  const BLUR = 'blur';
+  const CLICK = 'click';
+  const LOAD = 'load';
+  const ERROR = 'error';
+  const WARN = 'warn';
+  const INFO = 'info';
+  const LOG = 'log';
+  const DEBUG = 'debug';
+  const HIDE = 'hide';
+  const REMOVE = 'remove';
+  const ADD = 'add';
+  const KEYUP = 'keyup';
+  const SPAN = 'span';
+  const BUTTON = 'button';
+  const DIV = 'div';
+  const LI = 'li';
+  const UL = 'ul';
+  const A = 'a';
+  const STYLE = 'style';
+  const CHROME = 'chrome';
+  const FIREFOX = 'firefox';
+  const EMPTY =  '';
+  const EDITABLE = 'contenteditable';
+  const DOWNLOAD_MIME = 'data:text/plain;charset=utf-8,';
   // CSS Selectors
-  const [
-    ALL_ROWS,
-    VISIBLE_ROWS,
-    VISIBLE_LINKS,
-    COPY_BUTTON,
-    REMOVE_BUTTON,
-  ] = [
-    ".row-link",
-    ".row-link:not(.hide)",
-    ".row-link:not(.hide) span",
-    ".button-wrapper:first-child",
-    ".button-wrapper:last-child",
-  ];
+  const ALL_ROWS = '.row-link';
+  const VISIBLE_ROWS = '.row-link:not(.hide)';
+  const VISIBLE_LINKS = '.row-link:not(.hide) span';
+  const COPY_BUTTON = '.button-wrapper:first-child';
+  const REMOVE_BUTTON = '.button-wrapper:last-child';
   // CSS Clases
-  const [
-    ROW_LINK,
-    TAB_ICON,
-    CLOSE_BUTTON,
-    CLOSE_BUTTON_CONTAINER,
-    BUTTON_WRAPPER,
-  ] = [
-    "row-link",
-    "tab-icon",
-    "close-button",
-    "close-button-container",
-    "button-wrapper",
-  ];
+  const ROW_LINK = 'row-link';
+  const TAB_ICON = 'tab-icon';
+  const CLOSE_BUTTON = 'close-button';
+  const CLOSE_BUTTON_CONTAINER = 'close-button-container';
+  const BUTTON_WRAPPER = 'button-wrapper';
   // Storage keys
+  /**
+   * @typedef {{
+   *   CONFIG: 'config'
+   * }} STORAGE
+   */
+  /** @typedef {keyof STORAGE} StorageMapKeys */
+  /** @typedef {STORAGE[StorageMapKeys]} StorageKeys */
+  /** @type {STORAGE} */
   const STORAGE = {
-    CONFIG: "config",
+    CONFIG: 'config',
   };
   // Browser Specific
   const BROWSER_CSS_VARIABLES = {
     [CHROME]: [
-      "--txt-box-width: 400px",
-      "--list-right-padding: 0",
+      '--txt-box-width: 400px',
+      '--list-right-padding: 0',
     ],
     [FIREFOX]: [
-      "--txt-box-width: 340px",
-      "--list-right-padding: 10px",
+      '--txt-box-width: 340px',
+      '--list-right-padding: 10px',
     ],
   };
 
   let searchTimer = UNSET_TIMER_REF;
 
+  /**
+   * Type of functions in logger
+   * @typedef { (message: string, ...args: unknown[]) => void } LogFunction
+   */
+  /**
+   * @typedef { ERROR | WARN | INFO | LOG | DEBUG } LogLevels
+   */
+  /**
+   * @typedef {{
+   *  [ERROR]: LogFunction;
+   *  [WARN]: LogFunction;
+   *  [INFO]: LogFunction;
+   *  [LOG]: LogFunction;
+   *  [DEBUG]: LogFunction;
+   * }} Logger
+   */
+
   const { error, warn, info, log, debug } = (() => {
-    return [ERROR, WARN, INFO, LOG, DEBUG].reduce((logger, stream) => {
-      logger[stream] = (message, ...rest) => {
-        console[stream](`${TAG}: ${message}`, ...rest);
+    /**
+     * @type {(previousValue: Logger, currentValue: LogLevels, currentIndex: number, array: string[]) => Logger}
+     */
+    const reduceFunction = (
+      /** @type {Logger} */ logger,
+      /** @type {LogLevels} */ level
+    ) => {
+      /** @type {LogFunction} */
+      const logFunction = (message, ...rest) => {
+        console[level](`${TAG}${message}`, ...rest);
       };
+      logger[level] = logFunction;
 
       return logger;
-    }, {});
+    };
+
+    const levels = /** @type {{ reduce: (callback: typeof reduceFunction, initial: object) => Logger }} */ ([ERROR, WARN, INFO, LOG, DEBUG]);
+
+    /** @type {Logger} */
+    const loggerObject = levels.reduce(reduceFunction, {});
+
+    return loggerObject;
   })();
 
   const BROWSER = (() => {
@@ -164,10 +163,72 @@
 
     addCssStyle(styles);
   };
+
+  /**
+   * Mark rows that match query visible
+   * and rows that don't hidden.
+   * This uses simple string matching with the rules:
+   * - "&" or (has to match all terms separated by ampersand)
+   * - "|" and (has to match at least one term separated by pipe)
+   * - "`" xor (has to match one and only one)
+   * - "^" not (negates the matching expression)
+   *
+   * @param {string} query String to match against
+   * @returns {void}
+   */
+  const filterItemsSimple = (query) => {
+    const isNegative = query.startsWith('^');
+    let cleanQuery = isNegative ? query.substring(1) : query;
+    const isAnd = cleanQuery.includes('&');
+    const isOr = cleanQuery.includes('|');
+    // const isPlain = !isAnd && !isOr;
+
+    if (isAnd && isOr) {
+      // This requires grouping which is better suited for regex
+      // version of the matching.
+      return;
+    }
+
+    let /** @type {'every' | 'some'} */ arrayMethod;
+    let /** @type {string[]} */ terms;
+
+    if (isAnd) {
+      terms = cleanQuery.split('&');
+      arrayMethod = 'every';
+    } else {
+      terms = cleanQuery.split('|');
+      arrayMethod = 'some';
+    }
+
+    document.querySelectorAll(ALL_ROWS).forEach(item => {
+      const text = item.querySelector(SPAN)?.textContent || '';
+      let classMethod = REMOVE;
+      try {
+        if (terms[arrayMethod](term => term.includes(text))) {
+          classMethod = ADD;
+        }
+      } catch (e) {
+        error('[FilterSimple] Error matching term:', text, e);
+        // Fallback to show
+        classMethod = REMOVE;
+      }
+
+      item.classList[classMethod](HIDE);
+    });
+  };
+
   // TODO: Add message for no results?
   // TODO: Need to improve search. Add basic search.
   // Regex will do for now.
-  const filterItems = (input) => {
+  /**
+   * Mark rows that match query visible
+   * and rows that don't hidden.
+   * This uses regex rules by javascript to do matches.
+   *
+   * @param {string} query String to match against
+   * @returns {void}
+   */
+  const filterItemsByRegexp = (query) => {
     // Regex
     // Exceptions: SyntaxError
     // Thrown if one of the following is true:
@@ -175,7 +236,7 @@
     // > flags contains repeated characters or any character outside of those allowed.
     // Src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp
 
-    // TODO: Investigate if error is at instantiation time (e.g. new Regex(input))
+    // TODO: Investigate if error is at instantiation time (e.g. new Regex(query))
     // or when using the object (e.g. someRegex.test(text)).
     // The below snipet could be a better abstraction and avoid continues exceptions
     // but it will only work if the exception is during instantiation.
@@ -184,37 +245,52 @@
     // let isMatchingText;
 
     // try {
-    //   const searchPatter = new RegExp(input);
+    //   const searchPattern = new RegExp(query);
 
-    //   isMatchingText = (content) => searchPatter.test(content);
+    //   isMatchingText = (content) => searchPattern.test(content);
     // } catch (error) {
-    //   isMatchingText = (content) => content.includes(input);
+    //   isMatchingText = (content) => content.includes(query);
     // }
 
     // const method = isMatchingText(text.textContent)
     //   ? REMOVE // Remove .hide class
     //   : ADD // Add .hide class
 
+    /** @type {RegExp} */
+    let searchPattern;
+    try {
+      searchPattern = new RegExp(query);
+    } catch (e) {
+      error('[FilterRegexp] Error creating regexp:', e);
+      // No assingning fallback to searchPattern to use
+      // fallback with includes
+    }
+
     document.querySelectorAll(ALL_ROWS).forEach(item => {
       const text = item.querySelector(SPAN)?.textContent || '';
-      let method = REMOVE;
+      // NOTE: Method adds or removes the 'hide' class
+      // so initial remove means all are visible by default
+      let classMethod = REMOVE;
       try {
-        const searchPatter = new RegExp(input);
-
-        if (!searchPatter.test(text)) {
-          method = ADD;
+        if (!searchPattern.test(text)) {
+          classMethod = ADD;
         }
-        
+
       } catch (error) {
-        if (!text.includes(input)) {
-          method = ADD;
+        if (!text.includes(query)) {
+          classMethod = ADD;
         }
       }
 
-      item.classList[method](HIDE);
+      item.classList[classMethod](HIDE);
     });
   };
 
+  /**
+   * Make all available rows visible
+   *
+   * @returns {void}
+   */
   const setAllVisible = () => {
     document.querySelectorAll(ALL_ROWS)
       .forEach(i => i.classList.remove(HIDE));
@@ -298,6 +374,20 @@
     evt.target.contentEditable = false;
   };
 
+  /**
+   * Creates a "li" element formatted for display
+   *
+   * @param {string} linkText String url for the tab
+   * @param {string} imageUrl String url for the favicon
+   * @returns {{
+   *   item: HTMLLIElement;
+   *   imageBtn: HTMLButtonElement;
+   *   text: HTMLSpanElement;
+   *   closeBtn: HTMLButtonElement;
+   *   imageWrapper: HTMLDivElement;
+   *   closeWrapper: HTMLDivElement;
+   * }}
+   */
   const createItemForList = (linkText, imageUrl) => {
     // HTML elements
     const text = getTextContainer(linkText);
@@ -332,6 +422,13 @@
     return { item, imageBtn, text, closeBtn, imageWrapper, closeWrapper };
   };
 
+  /**
+   * Creates a "li" element formatted for display
+   *
+   * @param {string} linkText String url for the tab
+   * @param {string} imageUrl String url for the favicon
+   * @returns {HTMLLIElement}
+   */
   const formatLink = (linkText, imageUrl) => {
     const { item } = createItemForList(linkText, imageUrl);
 
@@ -339,6 +436,18 @@
   };
 
   // Storage methods wrapped in promises.
+  /** @typedef {{ checked: boolean }} Config */
+  /**
+   * Type of the object stored in storage.sync
+   * @typedef {{
+   *   config: Config;
+   * }} SyncStorage
+   */
+
+  /**
+   * @param {StorageKeys} key 
+   * @returns {Promise<SyncStorage[StorageKeys]>}
+   */
   const getStorage = (key) => {
     return new Promise(resolve => {
       // [Chrome Specific] - [FireFox support]
@@ -348,6 +457,12 @@
     });
   };
 
+  /**
+   * @template T
+   * @param {StorageKeys} key Key to add or update
+   * @param {T} item Item to store
+   * @returns {Promise<{ [typeof key]: T }>}
+   */
   const setStorage = (key, item) => {
     return new Promise(async resolve => {
       const stored = await getStorage(key);
@@ -365,12 +480,21 @@
     });
   };
 
-  const setTabsFromAllWindows = (cb) => {
+  /**
+   * 
+   * @param {(tab: chrome.tabs.Tab, index: number) => any} callback Callback function
+   * @returns {Promise<void>}
+   */
+  const setTabsFromAllWindows = (callback) => {
     return new Promise(resolve => {
       // [Chrome Specific] - [FireFox support]
       chrome.windows.getAll({ populate: true }, windows => {
         windows.forEach(window => {
-          window.tabs.forEach(cb);
+          if (!window.tabs) {
+            return;
+          }
+
+          window.tabs.forEach(callback);
         });
 
         resolve();
@@ -378,17 +502,26 @@
     });
   };
 
-  const setTabsCurrentWindow = (cb) => {
+  /**
+   * 
+   * @param {(tab: chrome.tabs.Tab, index: number) => any} callback Callback function
+   * @returns {Promise<void>}
+   */
+  const setTabsCurrentWindow = (callback) => {
     return new Promise(resolve => {
       // [Chrome Specific] - [FireFox support]
       chrome.windows.getCurrent({ populate: true }, window => {
-        window.tabs.forEach(cb);
+        window.tabs?.forEach(callback);
 
         resolve();
       });
     });
   };
 
+  /**
+   * Gets all the tabs from all existing windows of the browser
+   * @returns {Promise<chrome.tabs.Tab[]>}
+   */
   const getTabsFromAllWindows = () => {
     return new Promise(resolve => {
       // [Chrome Specific] - [FireFox support]
@@ -405,11 +538,15 @@
     });
   };
 
+  /**
+   * Gets all the tabs from the current active window of the browser
+   * @returns {Promise<chrome.tabs.Tab[]>}
+   */
   const getTabsCurrentWindow = () => {
     return new Promise(resolve => {
       // [Chrome Specific] - [FireFox support]
       chrome.windows.getCurrent({ populate: true }, window => {
-        resolve(window.tabs);
+        resolve(window.tabs || []);
       });
     });
   };
@@ -433,36 +570,44 @@
     const text = getAllTextLinks();
     copyAction(text);
   };
-  
+
   const getLinksHandler = async () => {
     const list = document.createElement(UL);
+    /**
+     * Function to apply to all tabs to gather information
+     * and build the list of elements to display
+     *
+     * @param {{ url?: string; favIconUrl?: string}} tab Tab from window
+     */
     const forEachTab = tab => {
       const { url, favIconUrl } = tab;
-      const item = formatLink(url, favIconUrl);
+      const item = formatLink(url || '', favIconUrl || '');
       list.appendChild(item);
     };
 
     const checked = allWindowsCheckbox.checked;
 
-    // TODO: Decide best approach
-    // const setTabs = checked
-    //   ? setTabsFromAllWindows
-    //   : setTabsCurrentWindow;
+    // NOTE: This should be faster
+    // as everything should happen on a single iteration.
+    const setTabs = checked
+      ? setTabsFromAllWindows
+      : setTabsCurrentWindow;
 
-    // await setTabs(forEachTab);
+    await setTabs(forEachTab);
 
-    const tabs = checked
-      ? await getTabsFromAllWindows()
-      : await getTabsCurrentWindow();
-
-    tabs.forEach(forEachTab);
+    // NOTE: This requires two iterations. One to get
+    // the tabs and one to create the "li" elements.
+    // const tabs = checked
+    //   ? await getTabsFromAllWindows()
+    //   : await getTabsCurrentWindow();
+    // tabs.forEach(forEachTab);
 
     txtArea.replaceChildren(list);
   };
-  
+
   const downloadHandler = () => {
     const text = getAllTextLinks();
-    
+
     if (!text) {
       return;
     }
@@ -495,9 +640,17 @@
     const enableEdit = !!document
       .querySelectorAll(VISIBLE_ROWS).length
 
-    txtArea.setAttribute(EDITABLE, enableEdit);
+    txtArea.setAttribute(EDITABLE, enableEdit.toString());
   };
 
+  /**
+   * Handle the search action.
+   * Items not matching the query will be hidden.
+   * Items matching the query will be visible.
+   * Empty query means everythign is visible
+   *
+   * @returns {void}
+   */
   const searchHandler = () => {
     const input = searchBox.value;
     if (!input || input.length === 0) {
@@ -507,7 +660,8 @@
       return;
     }
 
-    filterItems(input);
+    filterItemsByRegexp(input);
+    // filterItemsSimple(input);
     // enableContentEditable();
   };
 
