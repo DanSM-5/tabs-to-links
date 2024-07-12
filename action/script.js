@@ -6,13 +6,6 @@
 // Chrome manifest: v3
 // Firefox manifest: v2
 
-// TODO: Add a top level browser class fix incompatibility in css,
-// and merge master and master-firefox together
-
-// TODO: Consider a build script. Firefox and chrome cannot use same
-// manifest as chrome does not support "browser_specific_settings"
-// and will throw an exception if this is present.
-
 (_ => {
   // HTML Elements
   const allWindowsCheckbox = /** @type {HTMLInputElement} */ (document.querySelector('#all-windows'));
