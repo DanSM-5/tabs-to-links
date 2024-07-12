@@ -471,8 +471,15 @@
    * @returns {Promise<{ [k in key]: T }>}
    */
   const setStorage = (key, item) => {
-    return new Promise(async resolve => {
-      const stored = await getStorage(key);
+    const promise = /**
+      @type {{
+        promise: Promise<{ [k in key]: T }>;
+        resolve: (resolveArg: { [k in key]: T }) => void;
+        reject: typeof Promise.reject
+      }}
+    */(Promise.withResolvers());
+
+    getStorage(key).then(stored => {
       const updated = {
         [key]: {
           ...stored,
@@ -482,9 +489,15 @@
 
       // [Chrome Specific] - [FireFox support]
       chrome.storage.sync.set(updated, () => {
-        resolve(updated);
+        promise.resolve(updated);
       });
+    })
+    .catch(e => {
+      error('[Storage] Error updating storage:', e)
+      promise.reject(new Error('[Storage] Error updating storage', { cause: e }));
     });
+
+    return promise.promise;
   };
 
   /**
