@@ -281,6 +281,12 @@
       .forEach(i => i.classList.remove(HIDE));
   };
 
+  /**
+   * Sets the given text in the device clipboard
+   *
+   * @param {string} string Text to copy to device clipboard
+   * @returns {Promise<void>}
+   */
   const copyAction = async string => {
     if (!string) {
       return
@@ -293,6 +299,11 @@
     }
   }
 
+  /**
+   * Creates a button with an icon
+   * @param {string} url Url for the button icon
+   * @returns {HTMLButtonElement}
+   */
   const getImageButton = (url) => {
     const imageBtn = document.createElement(BUTTON);
 
@@ -323,6 +334,11 @@
     return imageBtn;
   };
 
+  /**
+   * Creates a span element with text content
+   * @param {string} linkText Text to display inside the element
+   * @returns {HTMLSpanElement}
+   */
   const getTextContainer = (linkText) => {
     const text = document.createElement(SPAN);
     text.textContent = linkText;
@@ -331,32 +347,52 @@
   };
 
   // Event Handlers
+  /**
+   * Event handler when a buttom image is clicked
+   * @param {MouseEvent} evt 
+   */
   const onClickImgButton = evt => {
-    const text = evt.target
-      .parentElement
-      .querySelector(SPAN)
+    const text = (/** @type {{ parentElement?: HTMLDivElement }} */(evt?.target))
+      ?.parentElement
+      ?.querySelector(SPAN)
       ?.textContent || EMPTY;
 
     copyAction(text);
   };
 
+  /**
+   * Event handler when a buttom image is clicked
+   * @param {MouseEvent} evt 
+   */
   const onClickCloseButton = evt => {
-    const item = evt.target
-      .parentElement;
+    const item = (/** @type {{ parentElement?: HTMLDivElement }} */ (evt?.target))
+      ?.parentElement;
+
+    if (!item) {
+      // Should be impossible to arrive here
+      return;
+    }
+
     const parent = item.parentElement;
-    const imageWrapper = item.querySelector(COPY_BUTTON);
-    const closeWrapper = item.querySelector(REMOVE_BUTTON);
+    const imageWrapper = (/** @type { HTMLDivElement } */ (item.querySelector(COPY_BUTTON)));
+    const closeWrapper = (/** @type { HTMLDivElement } */ (item.querySelector(REMOVE_BUTTON)));
     imageWrapper.removeEventListener(CLICK, onClickImgButton);
     closeWrapper.removeEventListener(CLICK, onClickCloseButton);
-    parent.removeChild(item);
+    parent?.removeChild(item);
   };
 
+  /**
+   * @param {MouseEvent} evt 
+   */
   const onTextClick = (evt) => {
-    evt.target.contentEditable = true;
+    (/** @type {HTMLSpanElement} */(evt.target)).contentEditable = 'true';
   };
 
+  /**
+   * @param {FocusEvent} evt 
+   */
   const onTextBlur = (evt) => {
-    evt.target.contentEditable = false;
+    (/** @type {HTMLSpanElement} */ (evt.target)).contentEditable = 'false';
   };
 
   /**
