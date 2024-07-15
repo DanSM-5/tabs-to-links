@@ -208,6 +208,9 @@
       arrayMethod = SOME;
     }
 
+    // Trim the terms, so white spaces can be added between separators
+    terms = terms.map(term => term.trim());
+
     document.querySelectorAll(ALL_ROWS).forEach(item => {
       try {
         const text = item.querySelector(SPAN)?.textContent || '';
