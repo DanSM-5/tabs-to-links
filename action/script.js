@@ -6,6 +6,13 @@
 // Chrome manifest: v3
 // Firefox manifest: v2
 
+// This is an example on how to implement strong typing by using jsdoc
+// You may need to do a `npm ci` to add the @types/chrome package or simply remove
+// the first line @ts-check to turn off type checking if it becomes to annoying.
+
+// If the Promise.withResolvers is showing an error, just open types/webapis.s.ts
+// Once the file is open the error will go away... 😅
+
 (_ => {
   // HTML Elements
   const allWindowsCheckbox = /** @type {HTMLInputElement} */ (document.querySelector('#all-windows'));
@@ -96,7 +103,7 @@
    * @typedef { (message: string, ...args: unknown[]) => void } LogFunction
    */
   /**
-   * @typedef { ERROR | WARN | INFO | LOG | DEBUG } LogLevels
+   * @typedef { typeof ERROR | typeof WARN | typeof INFO | typeof LOG | typeof DEBUG } LogLevels
    */
   /**
    * @typedef {{
@@ -197,7 +204,7 @@
       return;
     }
 
-    let /** @type {EVERY | SOME} */ arrayMethod;
+    let /** @type {typeof EVERY | typeof SOME} */ arrayMethod;
     let /** @type {string[]} */ terms;
 
     if (isAnd) {
@@ -719,6 +726,10 @@
       return;
     }
 
+    // The simple filter is more straightforward but it lacks
+    // filtering options like better negation support.
+    // The option exist because regexp isn't easy and requires
+    // you to know how to escape special characters.
     if (useRegexpCheckbox.checked) {
       filterItemsByRegexp(input);
     } else {
