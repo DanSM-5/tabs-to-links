@@ -355,8 +355,16 @@
    * @param {MouseEvent} evt 
    */
   const onClickImgButton = evt => {
-    const text = (/** @type {{ parentElement?: HTMLDivElement }} */(evt?.target))
-      ?.parentElement
+    const target = (/** @type { HTMLDivElement | HTMLButtonElement } */ (evt?.target))
+    /**
+     * @type { HTMLLIElement | null | undefined }
+     */
+    const listItem = target instanceof HTMLButtonElement
+      ? (/** @type {HTMLLIElement | undefined} */ (target.parentElement?.parentElement))
+      : (/** @type {HTMLLIElement | undefined} */ (target.parentElement));
+
+
+    const text = listItem
       ?.querySelector(SPAN)
       ?.textContent || EMPTY;
 
@@ -368,20 +376,29 @@
    * @param {MouseEvent} evt 
    */
   const onClickCloseButton = evt => {
-    const item = (/** @type {{ parentElement?: HTMLDivElement }} */ (evt?.target))
-      ?.parentElement;
+    const target = (/** @type { HTMLDivElement | HTMLButtonElement } */ (evt?.target))
+    
+    /**
+     * @type { HTMLLIElement | null | undefined }
+     */
+    const listItem = target instanceof HTMLButtonElement
+      ? (/** @type {HTMLLIElement | undefined} */ (target.parentElement?.parentElement?.parentElement))
+      : (/** @type {HTMLLIElement | undefined} */ (target.parentElement));
+  
+    // const listItem = (/** @type {{ parentElement?: HTMLDivElement }} */ (evt?.target))
+    //   ?.parentElement;
 
-    if (!item) {
+    if (!listItem) {
       // Should be impossible to arrive here
       return;
     }
 
-    const parent = item.parentElement;
-    const imageWrapper = (/** @type { HTMLDivElement } */ (item.querySelector(COPY_BUTTON)));
-    const closeWrapper = (/** @type { HTMLDivElement } */ (item.querySelector(REMOVE_BUTTON)));
+    const list = listItem.parentElement;
+    const imageWrapper = (/** @type { HTMLDivElement } */ (listItem.querySelector(COPY_BUTTON)));
+    const closeWrapper = (/** @type { HTMLDivElement } */ (listItem.querySelector(REMOVE_BUTTON)));
     imageWrapper.removeEventListener(CLICK, onClickImgButton);
     closeWrapper.removeEventListener(CLICK, onClickCloseButton);
-    parent?.removeChild(item);
+    list?.removeChild(listItem);
   };
 
   /**
@@ -769,6 +786,7 @@
     setBrowserSpecificStyles();
     getLinksHandler();
     updatePlaceholder();
+    searchBox.focus();
     // setObserverTxtArea();
   };
 
