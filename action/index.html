@@ -10,9 +10,9 @@
 <body>
   <div id="main">
     <div id="search-wrapper">
-      <div id="search-btn" class="button-wrapper">
+      <button id="search-btn" class="button-wrapper search-button">
         <img src="../img/search-logo.svg" alt="search-logo" class="tab-icon">
-      </div>
+      </button>
       <div class="search-box-wrapper">
         <input
           type="text"
@@ -24,7 +24,7 @@
       </div>
       <button id="use-regexp-btn" class="btn btn-checked">
         <span>Regex</span>
-        <input type="checkbox" name="all-windows" id="use-regexp" class="ignore-button">
+        <input type="checkbox" name="all-windows" id="use-regexp" class="ignore-button" tabindex="-1">
       </button>
     </div>
     <div class="txt-box-container">
@@ -33,7 +33,7 @@
     <div id="btn-area">
       <button id="all-windows-btn" class="btn btn-checked">
         <span>All</span>
-        <input type="checkbox" name="all-windows" id="all-windows" class="ignore-button">
+        <input type="checkbox" name="all-windows" id="all-windows" class="ignore-button" tabindex="-1">
       </button>
       <button id="reset-btn" class="btn btn-main">
         <span>Reset</span>

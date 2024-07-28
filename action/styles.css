@@ -24,6 +24,9 @@
   --light-theme-button-text: hsl(0, 0%, 100%);
   --light-theme-scroll-background: hsl(0, 0%, 90%);
   --light-theme-scroll-color: hsl(0, 0%, 60%);
+
+  /* GENERIC */
+  --ui-left-separation: 3px;
 }
 
 body {
@@ -44,6 +47,12 @@ body {
   height: 40px;
   width: 100%;
   display: flex;
+}
+
+.search-button {
+  background-color: transparent;
+  border: unset;
+  margin: var(--ui-left-separation); 
 }
 
 .search-box-wrapper {
@@ -96,7 +105,7 @@ body {
 .txt-box ul {
   list-style: none;
   margin: 0;
-  padding: 0 var(--list-right-padding) 0 3px;
+  padding: 0 var(--list-right-padding) 0 var(--ui-left-separation);
   overflow-y: scroll;
   max-height: 350px;
 
@@ -198,8 +207,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 45px;
+  width: 38px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* Delegate all event to button-wrapper */
@@ -208,7 +218,9 @@ body {
   cursor: pointer;
 }
 
-.button-wrapper:hover {
+.button-wrapper:hover,
+.button-wrapper:focus-within,
+.button-wrapper:focus-visible {
   background: var(--light-theme-btn-wrapper-hover);
 }
 
@@ -358,7 +370,9 @@ body {
   .txt-box ul::-webkit-scrollbar-thumb {
     background: var(--light-theme-scroll-color);
   }
-  .button-wrapper:hover {
+  .button-wrapper:hover,
+  .button-wrapper:focus-within,
+  .button-wrapper:focus-visible {
     background: var(--light-theme-btn-wrapper-hover);
   }
   .button-wrapper:active {
@@ -415,7 +429,9 @@ body {
   .txt-box ul::-webkit-scrollbar-thumb {
     background: var(--dark-theme-scroll-color);
   }
-  .button-wrapper:hover {
+  .button-wrapper:hover,
+  .button-wrapper:focus-within,
+  .button-wrapper:focus-visible {
     background: var(--dark-theme-btn-wrapper-hover);
   }
   .button-wrapper:active {
