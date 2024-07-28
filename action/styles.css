@@ -176,6 +176,7 @@ body {
   appearance: unset;
   -webkit-writing-mode: unset;
   -moz-writing-mode: unset;
+  writing-mode: unset;
   border-image: unset;
   color: unset;
   cursor: pointer;
