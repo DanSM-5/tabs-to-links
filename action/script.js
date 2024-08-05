@@ -156,7 +156,7 @@
 
   /**
    * Add styles to the document by appending a style tag.
-   * @param {string} style Styles to append to the document 
+   * @param {string} style Styles to append to the document
    */
   const addCssStyle = (style) => {
     const cssStyle = document.createElement(STYLE);
@@ -352,7 +352,7 @@
   // Event Handlers
   /**
    * Event handler when a buttom image is clicked
-   * @param {MouseEvent} evt 
+   * @param {MouseEvent} evt
    */
   const onClickImgButton = evt => {
     const target = (/** @type { HTMLDivElement | HTMLButtonElement } */ (evt?.target))
@@ -373,18 +373,18 @@
 
   /**
    * Event handler when a buttom image is clicked
-   * @param {MouseEvent} evt 
+   * @param {MouseEvent} evt
    */
   const onClickCloseButton = evt => {
     const target = (/** @type { HTMLDivElement | HTMLButtonElement } */ (evt?.target))
-    
+
     /**
      * @type { HTMLLIElement | null | undefined }
      */
     const listItem = target instanceof HTMLButtonElement
       ? (/** @type {HTMLLIElement | undefined} */ (target.parentElement?.parentElement?.parentElement))
       : (/** @type {HTMLLIElement | undefined} */ (target.parentElement));
-  
+
     // const listItem = (/** @type {{ parentElement?: HTMLDivElement }} */ (evt?.target))
     //   ?.parentElement;
 
@@ -402,14 +402,14 @@
   };
 
   /**
-   * @param {MouseEvent} evt 
+   * @param {MouseEvent} evt
    */
   const onTextClick = (evt) => {
     (/** @type {HTMLSpanElement} */(evt.target)).contentEditable = 'true';
   };
 
   /**
-   * @param {FocusEvent} evt 
+   * @param {FocusEvent} evt
    */
   const onTextBlur = (evt) => {
     (/** @type {HTMLSpanElement} */ (evt.target)).contentEditable = 'false';
