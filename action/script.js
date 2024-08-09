@@ -145,8 +145,6 @@
 
     if (userAgent.indexOf(CHROME) !== -1) {
       return CHROME;
-    } else if(userAgent.indexOf(FIREFOX) !== -1) {
-      return FIREFOX
     }
 
     // TODO: Check support with other chromium browsers.
@@ -218,6 +216,7 @@
     // Trim the terms, so white spaces can be added between separators
     terms = terms.map(term => term.trim());
 
+    // biome-ignore lint/complexity/noForEach: prefer forEach for readability
     document.querySelectorAll(ALL_ROWS).forEach(item => {
       try {
         const text = item.querySelector(SPAN)?.textContent || '';
@@ -260,6 +259,7 @@
       isValid = (text) => text.includes(query);
     }
 
+    // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
     document.querySelectorAll(ALL_ROWS).forEach(item => {
       try {
         const text = item.querySelector(SPAN)?.textContent || '';
@@ -280,6 +280,7 @@
    * @returns {void}
    */
   const setAllVisible = () => {
+    // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
     document.querySelectorAll(ALL_ROWS)
       .forEach(i => i.classList.remove(HIDE));
   };
@@ -548,6 +549,7 @@
     return new Promise(resolve => {
       // [Chrome Specific] - [FireFox support]
       chrome.windows.getAll({ populate: true }, windows => {
+        // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
         windows.forEach(window => {
           if (!window.tabs) {
             return;
@@ -612,6 +614,7 @@
 
   const getAllTextLinks = () => {
     let text = EMPTY;
+    // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
     document
       .querySelectorAll(VISIBLE_LINKS)
       .forEach((el) => {
