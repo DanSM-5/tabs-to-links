@@ -13,65 +13,85 @@
 // If the Promise.withResolvers is showing an error, just open types/webapis.s.ts
 // Once the file is open the error will go away... 😅
 
-(_ => {
+((_) => {
   // HTML Elements
-  const allWindowsCheckbox = /** @type {HTMLInputElement} */ (document.querySelector('#all-windows'));
-  const allWindowsBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#all-windows-btn'));
-  const useRegexpCheckbox = /** @type {HTMLInputElement} */ (document.querySelector('#use-regexp'));
-  const useRegexpBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#use-regexp-btn'));
-  const searchBox = /** @type {HTMLInputElement} */ (document.querySelector('#search-box'));
-  const searchBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#search-btn'));
-  const resetBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#reset-btn'));
-  const downloadBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#download-btn'));
-  const copyBtn = /** @type {HTMLButtonElement} */ (document.querySelector('#copy-btn'));
-  const txtArea = /** @type {HTMLTextAreaElement} */ (document.querySelector('#txt-box'));
-  const TAG = '[Tabs2Links]';
-  const defaultIcon = '../img/question.png';
+  const allWindowsCheckbox = /** @type {HTMLInputElement} */ (
+    document.querySelector("#all-windows")
+  );
+  const allWindowsBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector("#all-windows-btn")
+  );
+  const useRegexpCheckbox = /** @type {HTMLInputElement} */ (
+    document.querySelector("#use-regexp")
+  );
+  const useRegexpBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector("#use-regexp-btn")
+  );
+  const searchBox = /** @type {HTMLInputElement} */ (
+    document.querySelector("#search-box")
+  );
+  const searchBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector("#search-btn")
+  );
+  const resetBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector("#reset-btn")
+  );
+  const downloadBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector("#download-btn")
+  );
+  const copyBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector("#copy-btn")
+  );
+  const txtArea = /** @type {HTMLTextAreaElement} */ (
+    document.querySelector("#txt-box")
+  );
+  const TAG = "[Tabs2Links]";
+  const defaultIcon = "../img/question.png";
   const DEBOUNCE_SEARCH_MS = 300;
   const UNSET_TIMER_REF = -1;
   // Constants
-  const BLUR = 'blur';
-  const CLICK = 'click';
-  const LOAD = 'load';
-  const ERROR = 'error';
-  const WARN = 'warn';
-  const INFO = 'info';
-  const LOG = 'log';
-  const DEBUG = 'debug';
-  const HIDE = 'hide';
-  const REMOVE = 'remove';
-  const ADD = 'add';
-  const KEYUP = 'keyup';
-  const SPAN = 'span';
-  const BUTTON = 'button';
-  const DIV = 'div';
-  const LI = 'li';
-  const UL = 'ul';
-  const A = 'a';
-  const STYLE = 'style';
-  const CHROME = 'chrome';
-  const FIREFOX = 'firefox';
-  const EMPTY =  '';
-  const EDITABLE = 'contenteditable';
-  const DOWNLOAD_MIME = 'data:text/plain;charset=utf-8,';
+  const BLUR = "blur";
+  const CLICK = "click";
+  const LOAD = "load";
+  const ERROR = "error";
+  const WARN = "warn";
+  const INFO = "info";
+  const LOG = "log";
+  const DEBUG = "debug";
+  const HIDE = "hide";
+  const REMOVE = "remove";
+  const ADD = "add";
+  const KEYUP = "keyup";
+  const SPAN = "span";
+  const BUTTON = "button";
+  const DIV = "div";
+  const LI = "li";
+  const UL = "ul";
+  const A = "a";
+  const STYLE = "style";
+  const CHROME = "chrome";
+  const FIREFOX = "firefox";
+  const EMPTY = "";
+  const EDITABLE = "contenteditable";
+  const DOWNLOAD_MIME = "data:text/plain;charset=utf-8,";
   // CSS Selectors
-  const ALL_ROWS = '.row-link';
-  const VISIBLE_ROWS = '.row-link:not(.hide)';
-  const VISIBLE_LINKS = '.row-link:not(.hide) span';
-  const COPY_BUTTON = '.button-wrapper:first-child';
-  const REMOVE_BUTTON = '.button-wrapper:last-child';
+  const ALL_ROWS = ".row-link";
+  const VISIBLE_ROWS = ".row-link:not(.hide)";
+  const VISIBLE_LINKS = ".row-link:not(.hide) span";
+  const COPY_BUTTON = ".button-wrapper:first-child";
+  const REMOVE_BUTTON = ".button-wrapper:last-child";
   // CSS Clases
-  const ROW_LINK = 'row-link';
-  const TAB_ICON = 'tab-icon';
-  const CLOSE_BUTTON = 'close-button';
-  const CLOSE_BUTTON_CONTAINER = 'close-button-container';
-  const BUTTON_WRAPPER = 'button-wrapper';
+  const ROW_LINK = "row-link";
+  const TAB_ICON = "tab-icon";
+  const CLOSE_BUTTON = "close-button";
+  const CLOSE_BUTTON_CONTAINER = "close-button-container";
+  const BUTTON_WRAPPER = "button-wrapper";
   // Array Methods
-  const EVERY = 'every';
-  const SOME = 'some';
+  const EVERY = "every";
+  const SOME = "some";
   // Placeholder content
-  const SEARCH_BY_REGEXP = 'Search using regex';
-  const SEARCH_BY_TEXT = 'Search text';
+  const SEARCH_BY_REGEXP = "Search using regex";
+  const SEARCH_BY_TEXT = "Search text";
   // Storage keys
   /**
    * @typedef {{
@@ -82,18 +102,12 @@
   /** @typedef {STORAGE[StorageMapKeys]} StorageKeys */
   /** @type {STORAGE} */
   const STORAGE = {
-    CONFIG: 'config',
+    CONFIG: "config",
   };
   // Browser Specific
   const BROWSER_CSS_VARIABLES = {
-    [CHROME]: [
-      '--txt-box-width: 400px',
-      '--list-right-padding: 0',
-    ],
-    [FIREFOX]: [
-      '--txt-box-width: 340px',
-      '--list-right-padding: 10px',
-    ],
+    [CHROME]: ["--txt-box-width: 400px", "--list-right-padding: 0"],
+    [FIREFOX]: ["--txt-box-width: 340px", "--list-right-padding: 10px"],
   };
 
   let searchTimer = UNSET_TIMER_REF;
@@ -132,7 +146,14 @@
       return logger;
     };
 
-    const levels = /** @type {{ reduce: (callback: typeof reduceFunction, initial: object) => Logger }} */ ([ERROR, WARN, INFO, LOG, DEBUG]);
+    const levels =
+      /** @type {{ reduce: (callback: typeof reduceFunction, initial: object) => Logger }} */ ([
+        ERROR,
+        WARN,
+        INFO,
+        LOG,
+        DEBUG,
+      ]);
 
     /** @type {Logger} */
     const loggerObject = levels.reduce(reduceFunction, {});
@@ -170,7 +191,7 @@
   const setBrowserSpecificStyles = () => {
     const browserVars = BROWSER_CSS_VARIABLES[BROWSER];
 
-    const stylesString = browserVars.join(';');
+    const stylesString = browserVars.join(";");
 
     const styles = `:root {${stylesString}}`;
 
@@ -189,10 +210,10 @@
    * @returns {void}
    */
   const filterItemsSimple = (query) => {
-    const isNegative = query.startsWith('^');
+    const isNegative = query.startsWith("^");
     const cleanQuery = isNegative ? query.substring(1) : query;
-    const isAnd = cleanQuery.includes('&');
-    const isOr = cleanQuery.includes('|');
+    const isAnd = cleanQuery.includes("&");
+    const isOr = cleanQuery.includes("|");
     // const isPlain = !isAnd && !isOr;
 
     if (isAnd && isOr) {
@@ -206,28 +227,29 @@
     let /** @type {string[]} */ terms;
 
     if (isAnd) {
-      terms = cleanQuery.split('&');
+      terms = cleanQuery.split("&");
       arrayMethod = EVERY;
     } else {
-      terms = cleanQuery.split('|');
+      terms = cleanQuery.split("|");
       arrayMethod = SOME;
     }
 
     // Trim the terms, so white spaces can be added between separators
-    terms = terms.map(term => term.trim());
+    terms = terms.map((term) => term.trim());
 
     // biome-ignore lint/complexity/noForEach: prefer forEach for readability
-    document.querySelectorAll(ALL_ROWS).forEach(item => {
+    document.querySelectorAll(ALL_ROWS).forEach((item) => {
       try {
-        const text = item.querySelector(SPAN)?.textContent || '';
-        const shouldHide = terms[arrayMethod](term => text.includes(term)) === isNegative;
+        const text = item.querySelector(SPAN)?.textContent || "";
+        const shouldHide =
+          terms[arrayMethod]((term) => text.includes(term)) === isNegative;
         // NOTE: Method adds or removes the 'hide' class
         // so initial remove means all are visible by default
         const classMethod = shouldHide ? ADD : REMOVE;
         item.classList[classMethod](HIDE);
       } catch (e) {
         // Should not arrive here
-        error('[FilterSimple] Error evaluating text:', e);
+        error("[FilterSimple] Error evaluating text:", e);
       }
     });
   };
@@ -255,21 +277,21 @@
       // > pattern cannot be parsed as a valid regular expression.
       // > flags contains repeated characters or any character outside of those allowed.
       // Src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp
-      debug('[FilterRegexp] Error creating regexp:', e);
+      debug("[FilterRegexp] Error creating regexp:", e);
       isValid = (text) => text.includes(query);
     }
 
     // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
-    document.querySelectorAll(ALL_ROWS).forEach(item => {
+    document.querySelectorAll(ALL_ROWS).forEach((item) => {
       try {
-        const text = item.querySelector(SPAN)?.textContent || '';
+        const text = item.querySelector(SPAN)?.textContent || "";
         // NOTE: Method adds or removes the 'hide' class
         // so initial remove means all are visible by default
         const classMethod = isValid(text) ? REMOVE : ADD;
         item.classList[classMethod](HIDE);
       } catch (e) {
         // Should not arrive here
-        error('[FilterRegexp] Error evaluating text:', e);
+        error("[FilterRegexp] Error evaluating text:", e);
       }
     });
   };
@@ -281,8 +303,9 @@
    */
   const setAllVisible = () => {
     // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
-    document.querySelectorAll(ALL_ROWS)
-      .forEach(i => i.classList.remove(HIDE));
+    document
+      .querySelectorAll(ALL_ROWS)
+      .forEach((i) => i.classList.remove(HIDE));
   };
 
   /**
@@ -291,17 +314,17 @@
    * @param {string} string Text to copy to device clipboard
    * @returns {Promise<void>}
    */
-  const copyAction = async string => {
+  const copyAction = async (string) => {
     if (!string) {
-      return
+      return;
     }
 
     try {
       await navigator.clipboard.writeText(string);
     } catch (error) {
-      warn('Unable to copy text in clipboard.');
+      warn("Unable to copy text in clipboard.");
     }
-  }
+  };
 
   /**
    * Creates a button with an icon
@@ -355,19 +378,21 @@
    * Event handler when a buttom image is clicked
    * @param {MouseEvent} evt
    */
-  const onClickImgButton = evt => {
-    const target = (/** @type { HTMLDivElement | HTMLButtonElement } */ (evt?.target))
+  const onClickImgButton = (evt) => {
+    const target = /** @type { HTMLDivElement | HTMLButtonElement } */ (
+      evt?.target
+    );
     /**
      * @type { HTMLLIElement | null | undefined }
      */
-    const listItem = target instanceof HTMLButtonElement
-      ? (/** @type {HTMLLIElement | undefined} */ (target.parentElement?.parentElement))
-      : (/** @type {HTMLLIElement | undefined} */ (target.parentElement));
+    const listItem =
+      target instanceof HTMLButtonElement
+        ? /** @type {HTMLLIElement | undefined} */ (
+            target.parentElement?.parentElement
+          )
+        : /** @type {HTMLLIElement | undefined} */ (target.parentElement);
 
-
-    const text = listItem
-      ?.querySelector(SPAN)
-      ?.textContent || EMPTY;
+    const text = listItem?.querySelector(SPAN)?.textContent || EMPTY;
 
     copyAction(text);
   };
@@ -376,15 +401,20 @@
    * Event handler when a buttom image is clicked
    * @param {MouseEvent} evt
    */
-  const onClickCloseButton = evt => {
-    const target = (/** @type { HTMLDivElement | HTMLButtonElement } */ (evt?.target))
+  const onClickCloseButton = (evt) => {
+    const target = /** @type { HTMLDivElement | HTMLButtonElement } */ (
+      evt?.target
+    );
 
     /**
      * @type { HTMLLIElement | null | undefined }
      */
-    const listItem = target instanceof HTMLButtonElement
-      ? (/** @type {HTMLLIElement | undefined} */ (target.parentElement?.parentElement?.parentElement))
-      : (/** @type {HTMLLIElement | undefined} */ (target.parentElement));
+    const listItem =
+      target instanceof HTMLButtonElement
+        ? /** @type {HTMLLIElement | undefined} */ (
+            target.parentElement?.parentElement?.parentElement
+          )
+        : /** @type {HTMLLIElement | undefined} */ (target.parentElement);
 
     // const listItem = (/** @type {{ parentElement?: HTMLDivElement }} */ (evt?.target))
     //   ?.parentElement;
@@ -395,8 +425,12 @@
     }
 
     const list = listItem.parentElement;
-    const imageWrapper = (/** @type { HTMLDivElement } */ (listItem.querySelector(COPY_BUTTON)));
-    const closeWrapper = (/** @type { HTMLDivElement } */ (listItem.querySelector(REMOVE_BUTTON)));
+    const imageWrapper = /** @type { HTMLDivElement } */ (
+      listItem.querySelector(COPY_BUTTON)
+    );
+    const closeWrapper = /** @type { HTMLDivElement } */ (
+      listItem.querySelector(REMOVE_BUTTON)
+    );
     imageWrapper.removeEventListener(CLICK, onClickImgButton);
     closeWrapper.removeEventListener(CLICK, onClickCloseButton);
     list?.removeChild(listItem);
@@ -406,14 +440,14 @@
    * @param {MouseEvent} evt
    */
   const onTextClick = (evt) => {
-    (/** @type {HTMLSpanElement} */(evt.target)).contentEditable = 'true';
+    /** @type {HTMLSpanElement} */ (evt.target).contentEditable = "true";
   };
 
   /**
    * @param {FocusEvent} evt
    */
   const onTextBlur = (evt) => {
-    (/** @type {HTMLSpanElement} */ (evt.target)).contentEditable = 'false';
+    /** @type {HTMLSpanElement} */ (evt.target).contentEditable = "false";
   };
 
   /**
@@ -496,9 +530,9 @@
    * @returns {Promise<SyncStorage[StorageKeys]>}
    */
   const getStorage = (key) => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       // [Chrome Specific] - [FireFox support]
-      chrome.storage.sync.get(key, stored => {
+      chrome.storage.sync.get(key, (stored) => {
         resolve(stored[key] || {});
       });
     });
@@ -517,25 +551,28 @@
         resolve: (resolveArg: { [k in key]: T }) => void;
         reject: typeof Promise.reject
       }}
-    */(Promise.withResolvers());
+    */ (Promise.withResolvers());
 
-    getStorage(key).then(stored => {
-      const updated = {
-        [key]: {
-          ...stored,
-          ...item,
-        }
-      };
+    getStorage(key)
+      .then((stored) => {
+        const updated = {
+          [key]: {
+            ...stored,
+            ...item,
+          },
+        };
 
-      // [Chrome Specific] - [FireFox support]
-      chrome.storage.sync.set(updated, () => {
-        promise.resolve(updated);
+        // [Chrome Specific] - [FireFox support]
+        chrome.storage.sync.set(updated, () => {
+          promise.resolve(updated);
+        });
+      })
+      .catch((e) => {
+        error("[Storage] Error updating storage:", e);
+        promise.reject(
+          new Error("[Storage] Error updating storage", { cause: e })
+        );
       });
-    })
-    .catch(e => {
-      error('[Storage] Error updating storage:', e)
-      promise.reject(new Error('[Storage] Error updating storage', { cause: e }));
-    });
 
     return promise.promise;
   };
@@ -546,11 +583,11 @@
    * @returns {Promise<void>}
    */
   const setTabsFromAllWindows = (callback) => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       // [Chrome Specific] - [FireFox support]
-      chrome.windows.getAll({ populate: true }, windows => {
+      chrome.windows.getAll({ populate: true }, (windows) => {
         // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
-        windows.forEach(window => {
+        windows.forEach((window) => {
           if (!window.tabs) {
             return;
           }
@@ -569,9 +606,9 @@
    * @returns {Promise<void>}
    */
   const setTabsCurrentWindow = (callback) => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       // [Chrome Specific] - [FireFox support]
-      chrome.windows.getCurrent({ populate: true }, window => {
+      chrome.windows.getCurrent({ populate: true }, (window) => {
         window.tabs?.forEach(callback);
 
         resolve();
@@ -584,14 +621,14 @@
    * @returns {Promise<chrome.tabs.Tab[]>}
    */
   const getTabsFromAllWindows = () => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       // [Chrome Specific] - [FireFox support]
-      chrome.windows.getAll({ populate: true }, windows => {
+      chrome.windows.getAll({ populate: true }, (windows) => {
         let allTabs = [];
 
         for (let i = 0; i < windows.length; ++i) {
           const win = windows[i];
-          allTabs = allTabs.concat(win.tabs)
+          allTabs = allTabs.concat(win.tabs);
         }
 
         resolve(allTabs);
@@ -604,9 +641,9 @@
    * @returns {Promise<chrome.tabs.Tab[]>}
    */
   const getTabsCurrentWindow = () => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       // [Chrome Specific] - [FireFox support]
-      chrome.windows.getCurrent({ populate: true }, window => {
+      chrome.windows.getCurrent({ populate: true }, (window) => {
         resolve(window.tabs || []);
       });
     });
@@ -615,9 +652,7 @@
   const getAllTextLinks = () => {
     let text = EMPTY;
     // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
-    document
-      .querySelectorAll(VISIBLE_LINKS)
-      .forEach((el) => {
+    document.querySelectorAll(VISIBLE_LINKS).forEach((el) => {
       const itemText = el.textContent || EMPTY;
 
       // Prevent adding break lines if item has no content
@@ -626,7 +661,7 @@
 
     // Remove leading '\n'
     return text.substring(1);
-  }
+  };
 
   const copyHandler = () => {
     const text = getAllTextLinks();
@@ -641,9 +676,9 @@
      *
      * @param {{ url?: string; favIconUrl?: string}} tab Tab from window
      */
-    const forEachTab = tab => {
+    const forEachTab = (tab) => {
       const { url, favIconUrl } = tab;
-      const item = formatLink(url || '', favIconUrl || '');
+      const item = formatLink(url || "", favIconUrl || "");
       list.appendChild(item);
     };
 
@@ -651,9 +686,7 @@
 
     // NOTE: This should be faster
     // as everything should happen on a single iteration.
-    const setTabs = checked
-      ? setTabsFromAllWindows
-      : setTabsCurrentWindow;
+    const setTabs = checked ? setTabsFromAllWindows : setTabsCurrentWindow;
 
     await setTabs(forEachTab);
 
@@ -675,7 +708,7 @@
     }
 
     const link = document.createElement(A);
-    const date = (new Date()).toISOString().replace(/:/gi, '-');
+    const date = new Date().toISOString().replace(/:/gi, "-");
 
     link.download = `links_${date}.txt`;
     link.href = `${DOWNLOAD_MIME}${encodeURIComponent(text)}`;
@@ -688,30 +721,28 @@
     } else {
       searchBox.placeholder = SEARCH_BY_TEXT;
     }
-  }
+  };
 
   const toggleRegexpConfigHandler = () => {
     const useRegexp = !useRegexpCheckbox.checked;
 
-    setStorage(STORAGE.CONFIG, { useRegexp })
-      .catch(e => {
-        error('[Storage] Error updating config.useRegexp to:', useRegexp, e);
-      });
+    setStorage(STORAGE.CONFIG, { useRegexp }).catch((e) => {
+      error("[Storage] Error updating config.useRegexp to:", useRegexp, e);
+    });
 
     useRegexpCheckbox.checked = useRegexp;
 
     // Need to update the search
     searchHandler();
     updatePlaceholder();
-  }
+  };
 
   const checkAllWindowsHandler = () => {
     const allWindows = !allWindowsCheckbox.checked;
 
-    setStorage(STORAGE.CONFIG, { allWindows })
-      .catch(e => {
-        error('[Storage] Error updating config.allWindows to:', allWindows, e);
-      });
+    setStorage(STORAGE.CONFIG, { allWindows }).catch((e) => {
+      error("[Storage] Error updating config.allWindows to:", allWindows, e);
+    });
 
     allWindowsCheckbox.checked = allWindows;
 
@@ -721,10 +752,8 @@
 
   // Remove content editable if there is nore more items
   const enableContentEditable = (mutationList, observer) => {
-
     // Enable if there are items left and they are visible
-    const enableEdit = !!document
-      .querySelectorAll(VISIBLE_ROWS).length
+    const enableEdit = !!document.querySelectorAll(VISIBLE_ROWS).length;
 
     txtArea.setAttribute(EDITABLE, enableEdit.toString());
   };
