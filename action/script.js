@@ -168,8 +168,6 @@
       return CHROME;
     }
 
-    // TODO: Check support with other chromium browsers.
-    // Use lowest supported option.
     return FIREFOX;
   })();
 
@@ -624,11 +622,15 @@
     return new Promise((resolve) => {
       // [Chrome Specific] - [FireFox support]
       chrome.windows.getAll({ populate: true }, (windows) => {
+        /**
+         * @type {chrome.tabs.Tab[]}
+         */
         let allTabs = [];
 
         for (let i = 0; i < windows.length; ++i) {
           const win = windows[i];
-          allTabs = allTabs.concat(win.tabs);
+          const tabs = win.tabs || [];
+          allTabs = allTabs.concat(tabs);
         }
 
         resolve(allTabs);
@@ -751,11 +753,12 @@
   };
 
   // Remove content editable if there is nore more items
-  const enableContentEditable = (mutationList, observer) => {
+  const enableContentEditable = (/** @type {MutationRecord[]} */ _mutationList, /** @type {MutationObserver} */ _observer) => {
     // Enable if there are items left and they are visible
     const enableEdit = !!document.querySelectorAll(VISIBLE_ROWS).length;
 
     txtArea.setAttribute(EDITABLE, enableEdit.toString());
+    // observer.disconnect();
   };
 
   /**
