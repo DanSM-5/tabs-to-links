@@ -134,8 +134,8 @@
      * @type {(previousValue: Logger, currentValue: LogLevels, currentIndex: number, array: string[]) => Logger}
      */
     const reduceFunction = (
-      /** @type {Logger} */ logger,
-      /** @type {LogLevels} */ level
+			/** @type {Logger} */ logger,
+			/** @type {LogLevels} */ level,
     ) => {
       /** @type {LogFunction} */
       const logFunction = (message, ...rest) => {
@@ -147,7 +147,7 @@
     };
 
     const levels =
-      /** @type {{ reduce: (callback: typeof reduceFunction, initial: object) => Logger }} */ ([
+			/** @type {{ reduce: (callback: typeof reduceFunction, initial: object) => Logger }} */ ([
         ERROR,
         WARN,
         INFO,
@@ -386,8 +386,8 @@
     const listItem =
       target instanceof HTMLButtonElement
         ? /** @type {HTMLLIElement | undefined} */ (
-            target.parentElement?.parentElement
-          )
+          target.parentElement?.parentElement
+        )
         : /** @type {HTMLLIElement | undefined} */ (target.parentElement);
 
     const text = listItem?.querySelector(SPAN)?.textContent || EMPTY;
@@ -410,8 +410,8 @@
     const listItem =
       target instanceof HTMLButtonElement
         ? /** @type {HTMLLIElement | undefined} */ (
-            target.parentElement?.parentElement?.parentElement
-          )
+          target.parentElement?.parentElement?.parentElement
+        )
         : /** @type {HTMLLIElement | undefined} */ (target.parentElement);
 
     // const listItem = (/** @type {{ parentElement?: HTMLDivElement }} */ (evt?.target))
@@ -438,14 +438,14 @@
    * @param {MouseEvent} evt
    */
   const onTextClick = (evt) => {
-    /** @type {HTMLSpanElement} */ (evt.target).contentEditable = "true";
+		/** @type {HTMLSpanElement} */ (evt.target).contentEditable = "true";
   };
 
   /**
    * @param {FocusEvent} evt
    */
   const onTextBlur = (evt) => {
-    /** @type {HTMLSpanElement} */ (evt.target).contentEditable = "false";
+		/** @type {HTMLSpanElement} */ (evt.target).contentEditable = "false";
   };
 
   /**
@@ -568,7 +568,7 @@
       .catch((e) => {
         error("[Storage] Error updating storage:", e);
         promise.reject(
-          new Error("[Storage] Error updating storage", { cause: e })
+          new Error("[Storage] Error updating storage", { cause: e }),
         );
       });
 
@@ -753,7 +753,10 @@
   };
 
   // Remove content editable if there is nore more items
-  const enableContentEditable = (/** @type {MutationRecord[]} */ _mutationList, /** @type {MutationObserver} */ _observer) => {
+  const enableContentEditable = (
+		/** @type {MutationRecord[]} */ _mutationList,
+		/** @type {MutationObserver} */ _observer,
+  ) => {
     // Enable if there are items left and they are visible
     const enableEdit = !!document.querySelectorAll(VISIBLE_ROWS).length;
 
