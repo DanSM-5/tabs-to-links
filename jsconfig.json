@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
+    "strict": true,
+    "target": "es6",
     "lib": [
       "ESNext",
+      "dom"
     ],
     "typeRoots": [
       "./node_modules/@types",
