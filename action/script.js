@@ -364,20 +364,18 @@
   }
 
   const firefoxNotificationRequest = () => {
-    if (BROWSER !== FIREFOX || Notification.permission !== 'default') {
+    if (BROWSER !== FIREFOX || Notification.permission !== "default") {
       return;
     }
 
-    // Request before promise
     // Firefox just making the life harder for developers as always...
-    Notification.requestPermission().then(permission => {
-      if (permission !== 'granted') {
-        return;
-      }
-
-      extension_notify(NOTIFICATION_ID, 'You will be notified the next time you copy a link!', [{ title: OK }]);
+    // Ask to allow user to deny but the extension will take "default" as "granted".
+    // As it is not possible to check the regular permissions (see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/notifications)
+    // We attempt to ask using the web notification api instead.
+    Notification.requestPermission().then(_permission => {
+      // Do nothing
     }).catch((e) => {
-      console.error('Cannot request for notifications', e)
+      console.error("Cannot request for notifications", e)
     });
   }
 
@@ -409,12 +407,12 @@
       switch (BROWSER) {
         case FIREFOX:
           // NOTE: Firefox does not implement 'getPermissionLevel'.
-          // Only show notifications if explicitly allowed.
+          // Only skip notifications if explicitly denied.
           switch (Notification.permission) {
-            case 'denied':
-            case 'default':
+            case "denied":
               return;
 
+            case "default":
             case "granted":
               notify_host();
               break;
