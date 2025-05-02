@@ -2,7 +2,15 @@
 
 [[ -v debug ]] && set -x
 
+set -e
+
 browser="$1"
+
+if [ -z "$browser" ]; then
+  printf 'Argument "browser" is required\n' >&2
+  exit 1
+fi
+
 BROWSER_MANIFEST="$browser.json"
 MANIFEST="manifest.json"
 VERSION=$(sed -nr "s/.*version.*\"([0-9]+\.[0-9]+\.[0-9]+)\".*/\1/p" package.json)
@@ -13,7 +21,8 @@ DATE="$(date +'%d-%m-%YT%H-%M-%S-%3N')"
 BUILD="$DIST_PATH/${browser}_v${VERSION}_${DATE}.zip"
 
 if ! [ -f "manifests/$BROWSER_MANIFEST" ]; then
-  echo "Browser "$browser" not supported for build."
+  printf 'Browser "%s" not supported for build.\n' "$browser" >&2
+  exit 1
 fi
 
 # Remove existing build directory
@@ -34,9 +43,10 @@ sed -r -i'.bak' -e "s/\{\{VERSION\}\}/$VERSION/g" "$BUILD_PATH/$MANIFEST"
 [ -f "$BUILD_PATH/$MANIFEST.bak" ] && rm "$BUILD_PATH/$MANIFEST.bak"
 
 if ! command -v zip; then
-  echo "zip command not found. Please install it to create a zip"
+  printf 'zip command not found. Please install it if you want files to be zipped.\n'
   exit 0
 fi
 
-pushd "$BUILD_PATH"
-zip -r -FS "../../$BUILD" *
+pushd "$BUILD_PATH" &>/dev/null || exit
+zip -r -FS "../../$BUILD" ./*
+popd &>/dev/null || exit
