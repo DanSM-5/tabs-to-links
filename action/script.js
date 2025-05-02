@@ -363,6 +363,24 @@
     })
   }
 
+  const firefoxNotificationRequest = () => {
+    if (BROWSER !== FIREFOX || Notification.permission !== 'default') {
+      return;
+    }
+
+    // Request before promise
+    // Firefox just making the life harder for developers as always...
+    Notification.requestPermission().then(permission => {
+      if (permission !== 'granted') {
+        return;
+      }
+
+      extension_notify(NOTIFICATION_ID, 'You will be notified the next time you copy a link!', [{ title: OK }]);
+    }).catch((e) => {
+      console.error('Cannot request for notifications', e)
+    });
+  }
+
   /**
    * Sets the given text in the device clipboard
    *
@@ -391,21 +409,11 @@
       switch (BROWSER) {
         case FIREFOX:
           // NOTE: Firefox does not implement 'getPermissionLevel'.
-          // We gently ask the user for permissions if haven't already.
-          // Only show notifications if explisitly allowed.
+          // Only show notifications if explicitly allowed.
           switch (Notification.permission) {
             case 'denied':
-              return;
-
             case 'default':
-              Notification.requestPermission().then(permission => {
-                if (permission !== 'granted') {
-                  return;
-                }
-
-                notify_host();
-              });
-              break;
+              return;
 
             case "granted":
               notify_host();
@@ -497,6 +505,7 @@
 
     const text = listItem?.querySelector(SPAN)?.textContent || EMPTY;
 
+    firefoxNotificationRequest();
     copyAction(text, false);
   };
 
@@ -772,6 +781,8 @@
 
   const copyHandler = () => {
     const text = getAllTextLinks();
+
+    firefoxNotificationRequest();
     copyAction(text, true);
   };
 
