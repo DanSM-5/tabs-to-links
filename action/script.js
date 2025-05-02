@@ -47,6 +47,7 @@
   );
   const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
+  const t2lIcon = "../icons/icon128.png";
   const DEBOUNCE_SEARCH_MS = 300;
   const UNSET_TIMER_REF = -1;
   // Constants
@@ -92,6 +93,12 @@
   // Placeholder content
   const SEARCH_BY_REGEXP = "Search using regex";
   const SEARCH_BY_TEXT = "Search text";
+  const NOTIFICATION_ID = "tabs-to-links_global_notificationId";
+  const OK = "OK";
+  const NOTIFICATION_TITLE = "Copied to clipboard";
+  const BEFORE_UNLOAD = "beforeunload";
+  const TYPE_BASIC = "basic";
+
   // Storage keys
   /**
    * @typedef {{
@@ -307,18 +314,84 @@
   };
 
   /**
+   * Send a notification that content has been copied to clipboard
+   * @param {string} id Notification id
+   * @param {string} message Message to notify to host
+   * @param {chrome.notifications.ButtonOptions[] | undefined} buttons Buttons to show in notification
+   * @returns {void}
+   */
+  const extension_notify = (id, message, buttons) => {
+    chrome.notifications.clear(id, () => {
+      chrome.notifications.create(id, {
+        buttons,
+        type: TYPE_BASIC,
+        message,
+        title: NOTIFICATION_TITLE,
+        iconUrl: t2lIcon,
+      });
+    });
+  };
+
+  /**
+   * Sets the notification handler callbacks and the cleanup logic
+   */
+  const set_notification_handlers = () => {
+    /** @type (notificationId: string, buttonIndex: number) => void): void */
+    const onButtonClickedCallback = (notificationId, _buttonIndex) => {
+      // NOTE: If this extend to other possible notifications,
+      // replace with a switch
+      if (notificationId === NOTIFICATION_ID) {
+        chrome.notifications.clear(notificationId);
+      }
+    };
+
+    /** @type (notificationId: string) => void): void */
+    const onClickedCallback = (notificationId) => {
+      // NOTE: If this extend to other possible notifications,
+      // replace with a switch
+      if (notificationId === NOTIFICATION_ID) {
+        chrome.notifications.clear(notificationId);
+      }
+    };
+
+    chrome.notifications.onButtonClicked.addListener(onButtonClickedCallback);
+    chrome.notifications.onClicked.addListener(onClickedCallback);
+
+    window.addEventListener(BEFORE_UNLOAD, () => {
+      chrome.notifications.onButtonClicked.removeListener(onButtonClickedCallback);
+      chrome.notifications.onClicked.removeListener(onClickedCallback);
+    })
+  }
+
+  /**
    * Sets the given text in the device clipboard
    *
    * @param {string} string Text to copy to device clipboard
+   * @param {boolean} all To indicate whether it is copying all links
    * @returns {Promise<void>}
    */
-  const copyAction = async (string) => {
+  const copyAction = async (string, all) => {
     if (!string) {
       return;
     }
 
     try {
       await navigator.clipboard.writeText(string);
+
+      // @ts-expect-error Only possible values override to allow nicer completion
+      // Ref: https://developer.chrome.com/docs/extensions/reference/api/notifications#type-PermissionLevel
+      chrome.notifications.getPermissionLevel((/** @type {"granted"|"denied"} */level) => {
+        if (level === "granted") {
+          const message = all
+            ? "All links have been copied to clipboard!"
+            : `Link copied: ${string}`;
+
+          extension_notify(NOTIFICATION_ID, message, [
+            { title: OK  },
+          ]);
+        }
+      });
+
     } catch (error) {
       warn("Unable to copy text in clipboard.");
     }
@@ -392,7 +465,7 @@
 
     const text = listItem?.querySelector(SPAN)?.textContent || EMPTY;
 
-    copyAction(text);
+    copyAction(text, false);
   };
 
   /**
@@ -667,7 +740,7 @@
 
   const copyHandler = () => {
     const text = getAllTextLinks();
-    copyAction(text);
+    copyAction(text, true);
   };
 
   const getLinksHandler = async () => {
@@ -837,6 +910,7 @@
     downloadBtn.addEventListener(CLICK, downloadHandler);
     copyBtn.addEventListener(CLICK, copyHandler);
     window.addEventListener(LOAD, onWindowsLoad);
+    set_notification_handlers();
   };
 
   loadListeners();
