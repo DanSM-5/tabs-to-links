@@ -378,19 +378,51 @@
     try {
       await navigator.clipboard.writeText(string);
 
-      // @ts-expect-error Only possible values override to allow nicer completion
-      // Ref: https://developer.chrome.com/docs/extensions/reference/api/notifications#type-PermissionLevel
-      chrome.notifications.getPermissionLevel((/** @type {"granted"|"denied"} */level) => {
-        if (level === "granted") {
-          const message = all
-            ? "All links have been copied to clipboard!"
-            : `Link copied: ${string}`;
+      const notify_host = () => {
+        const message = all
+          ? "All links have been copied to clipboard!"
+          : `Link copied: ${string}`;
 
-          extension_notify(NOTIFICATION_ID, message, [
-            { title: OK  },
-          ]);
-        }
-      });
+        extension_notify(NOTIFICATION_ID, message, [
+          { title: OK  },
+        ]);
+      };
+
+      switch (BROWSER) {
+        case FIREFOX:
+          // NOTE: Firefox does not implement 'getPermissionLevel'.
+          // We gently ask the user for permissions if haven't already.
+          // Only show notifications if explisitly allowed.
+          switch (Notification.permission) {
+            case 'denied':
+              return;
+
+            case 'default':
+              Notification.requestPermission().then(permission => {
+                if (permission !== 'granted') {
+                  return;
+                }
+
+                notify_host();
+              });
+              break;
+
+            case "granted":
+              notify_host();
+              break;
+          }
+          break;
+
+        default:
+          // @ts-expect-error Only possible values override to allow nicer completion
+          // Ref: https://developer.chrome.com/docs/extensions/reference/api/notifications#type-PermissionLevel
+          chrome.notifications.getPermissionLevel((/** @type {"granted"|"denied"} */level) => {
+            if (level === 'granted') {
+              notify_host();
+            }
+          });
+          break;
+      }
 
     } catch (error) {
       warn("Unable to copy text in clipboard.");
