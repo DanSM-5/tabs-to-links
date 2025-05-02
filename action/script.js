@@ -323,7 +323,8 @@
   const extension_notify = (id, message, buttons) => {
     chrome.notifications.clear(id, () => {
       chrome.notifications.create(id, {
-        buttons,
+        // NOTE: Buttons not supported by firefox
+        ...(BROWSER === CHROME ? { buttons } : {}),
         type: TYPE_BASIC,
         message,
         title: NOTIFICATION_TITLE,
