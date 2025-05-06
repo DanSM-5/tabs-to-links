@@ -81,7 +81,7 @@
   const VISIBLE_LINKS = ".row-link:not(.hide) span";
   const COPY_BUTTON = ".button-wrapper:first-child";
   const REMOVE_BUTTON = ".button-wrapper:last-child";
-  // CSS Clases
+  // CSS Classes
   const ROW_LINK = "row-link";
   const TAB_ICON = "tab-icon";
   const CLOSE_BUTTON = "close-button";
@@ -239,7 +239,7 @@
       arrayMethod = SOME;
     }
 
-    // Trim the terms, so white spaces can be added between separators
+    // Trim the terms, so whitespaces can be added between separators
     terms = terms.map((term) => term.trim());
 
     // biome-ignore lint/complexity/noForEach: prefer forEach for readability
@@ -372,7 +372,7 @@
     // Firefox just making the life harder for developers as always...
     // Ask to allow user to deny but the extension will take "default" as "granted".
     // As it is not possible to check the regular permissions (see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/notifications)
-    // We attempt to ask using the web notification api instead.
+    // We attempt to ask using the web notification API instead.
     Notification.requestPermission().then(_permission => {
       // Do nothing
     }).catch((e) => {
@@ -485,7 +485,7 @@
 
   // Event Handlers
   /**
-   * Event handler when a buttom image is clicked
+   * Event handler when a button image is clicked
    * @param {MouseEvent} evt
    */
   const onClickImgButton = (evt) => {
@@ -509,7 +509,7 @@
   };
 
   /**
-   * Event handler when a buttom image is clicked
+   * Event handler when a button image is clicked
    * @param {MouseEvent} evt
    */
   const onClickCloseButton = (evt) => {
@@ -867,10 +867,14 @@
     getLinksHandler();
   };
 
-  // Remove content editable if there is nore more items
+  /**
+   * Enable content editable in cell
+	 * @param {MutationRecord[]} _mutationList List to observe
+	 * @param {MutationObserver} _observer Observer
+   */
   const enableContentEditable = (
-		/** @type {MutationRecord[]} */ _mutationList,
-		/** @type {MutationObserver} */ _observer,
+		_mutationList,
+		_observer,
   ) => {
     // Enable if there are items left and they are visible
     const enableEdit = !!document.querySelectorAll(VISIBLE_ROWS).length;
@@ -883,7 +887,7 @@
    * Handle the search action.
    * Items not matching the query will be hidden.
    * Items matching the query will be visible.
-   * Empty query means everythign is visible
+   * Empty query means everything is visible
    *
    * @returns {void}
    */
