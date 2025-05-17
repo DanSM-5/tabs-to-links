@@ -60,15 +60,21 @@
   const openBtn = /** @type {HTMLButtonElement} */ (
     document.querySelector("#open-btn")
   );
+  const delayInput = /** @type {HTMLInputElement} */ (
+    document.querySelector("#delay-input")
+  );
   const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
   const t2lIcon = "../icons/icon128.png";
   const DEBOUNCE_SEARCH_MS = 300;
   const UNSET_TIMER_REF = -1;
+  const DEFAULT_DELAY = 1;
   // Constants
   const BLUR = "blur";
   const CLICK = "click";
   const CHANGE = "change";
+  const MOUSEOVER = "mouseover";
+  const MOUSEOUT = "mouseout";
   const LOAD = "load";
   const ERROR = "error";
   const WARN = "warn";
@@ -79,6 +85,7 @@
   const REMOVE = "remove";
   const ADD = "add";
   const KEYUP = "keyup";
+  const KEYDOWN = "keydown";
   const SPAN = "span";
   const BUTTON = "button";
   const DIV = "div";
@@ -91,12 +98,15 @@
   const EMPTY = "";
   const EDITABLE = "contenteditable";
   const DOWNLOAD_MIME = "data:text/plain;charset=utf-8,";
+  const OPEN_LINKS = 'open_links';
+  const POPOVERTARGET = "popovertarget"
   // CSS Selectors
   const ALL_ROWS = ".row-link";
   const VISIBLE_ROWS = ".row-link:not(.hide)";
   const VISIBLE_LINKS = ".row-link:not(.hide) span";
   const COPY_BUTTON = ".button-wrapper:first-child";
   const REMOVE_BUTTON = ".button-wrapper:last-child";
+  const ELEMENTS_WITH_POPOVERS = "[popovertarget][data-trigger='hover']";
   // CSS Classes
   const ROW_LINK = "row-link";
   const TAB_ICON = "tab-icon";
@@ -118,7 +128,79 @@
   const BEFORE_UNLOAD = "beforeunload";
   const TYPE_BASIC = "basic";
   const LINKS_AREA_MESSAGE = "// Add your links here\n// lines starting with '//', '#', and ';'\n// will be ignored\n";
-  const IGNORED_LINES = ['//', '#', ';'];
+
+  /**
+   * @template T
+   * @typedef {{ current: T }} RefObject
+   */
+
+  /** @type {RefObject<number>} */
+  const searchTimerRef = { current: UNSET_TIMER_REF };
+  /** @type {RefObject<number>} */
+  const saveDelayTimerRef = { current: UNSET_TIMER_REF };
+
+  /**
+   * @template {(...any: any[]) => any} T
+   * @param {T} func Function to debounce
+   * @param {RefObject<number>} ref Timer refId
+   * @param {number} [time] Debounce time
+   * @param {(ret: ReturnType<T>) => void} [notify] Notify function with returned value of func
+   * @returns {(...any: Parameters<T>) => void} Function with same signature but void return that is debounced
+   */
+  const debounceFunction = (func, ref, time = DEBOUNCE_SEARCH_MS, notify = () => {}) => {
+    return (...args) => {
+      if (ref.current !== UNSET_TIMER_REF) {
+        clearTimeout(ref.current);
+      }
+
+      ref.current = setTimeout(() => {
+        // cleanup ref
+        ref.current = UNSET_TIMER_REF;
+        // call wrapped function
+        const ret = func(...args);
+        // Notify if needed
+        notify?.(ret);
+      }, time);
+    };
+  };
+
+  /**
+   * Send a message to a service worker. This should be used for
+   * chromium based browsers only due to MV3
+   *
+   * @template T=any
+   * @template R=any
+   * @param {Message<T>} message Message to send to chrome service worker
+   * @returns {Promise<BackgroundResponse<R> | Error>} Message response from service worker
+   */
+  const sendMessageWorker = async (message) => {
+    try {
+      /** @type {BackgroundResponse<R>} */
+      const response = await chrome.runtime.sendMessage(message);
+      return response;
+    } catch (error) {
+      return error instanceof Error ? error : new Error(`${error}`);
+    }
+  };
+
+  /**
+   * Send a message to a service worker. This should be used for
+   * chromium based browsers only due to MV3
+   *
+   * @template T=any
+   * @template R=any
+   * @param {Message<T>} message Message to send to chrome service worker
+   * @returns {Promise<BackgroundResponse<R> | Error>} Message response from service worker
+   */
+  const sendMessageBackground = async (message) => {
+    const backgroundPage = chrome.extension.getBackgroundPage();
+    if (!backgroundPage) {
+      return Promise.reject(new Error('No background script found'));
+    }
+
+    const response = backgroundPage.sendBackgroundMessage(message);
+    return response instanceof Promise ? response : Promise.resolve(response);
+  }
 
   // Storage keys
   /**
@@ -128,6 +210,7 @@
    */
   /** @typedef {keyof STORAGE} StorageMapKeys */
   /** @typedef {STORAGE[StorageMapKeys]} StorageKeys */
+
   /** @type {STORAGE} */
   const STORAGE = {
     CONFIG: "config",
@@ -137,8 +220,6 @@
     [CHROME]: ["--txt-box-width: 400px", "--list-right-padding: 0"],
     [FIREFOX]: ["--txt-box-width: 340px", "--list-right-padding: 10px"],
   };
-
-  let searchTimer = UNSET_TIMER_REF;
 
   /**
    * Type of functions in logger
@@ -648,6 +729,7 @@
    * @typedef {{
    *   allWindows: boolean;
    *   useRegexp: boolean;
+   *   openDelay: number;
    * }} Config
    */
   /**
@@ -671,7 +753,7 @@
   };
 
   /**
-   * @template T
+   * @template {Partial<SyncStorage[StorageKeys]>} T
    * @param {StorageKeys} key Key to add or update
    * @param {T} item Item to store
    * @returns {Promise<{ [k in key]: T }>}
@@ -909,7 +991,6 @@
    * Items not matching the query will be hidden.
    * Items matching the query will be visible.
    * Empty query means everything is visible
-   *
    * @returns {void}
    */
   const searchHandler = () => {
@@ -937,16 +1018,18 @@
    * the function while typing.
    * @returns {void}
    */
-  const debouncedSearch = () => {
-    if (searchTimer !== UNSET_TIMER_REF) {
-      clearTimeout(searchTimer);
-    }
+  const debouncedSearch = debounceFunction(searchHandler, searchTimerRef);
 
-    searchTimer = setTimeout(() => {
-      searchTimer = UNSET_TIMER_REF;
-      searchHandler();
-    }, DEBOUNCE_SEARCH_MS);
+  const saveDelayTime = () => {
+    const current = delayInput.value;
+    const converted = Number.parseFloat(current);
+    const openDelay = Number.isNaN(converted) ? DEFAULT_DELAY : converted;
+    setStorage(STORAGE.CONFIG, { openDelay }).catch((e) => {
+      error(`[Storage] Error updating config.openDelay to ${openDelay}`, e);
+    });
   };
+
+  const debouncedSaveDelayTime = debounceFunction(saveDelayTime, saveDelayTimerRef);
 
   const setObserverTxtArea = () => {
     const config = { childList: true, subtree: true };
@@ -1008,28 +1091,39 @@
   };
 
   /**
-   * @param {number} time Sleep time in seconds
+   * Open links listed in the text area on new tabs
+   * Calling this function will close the popup action page
+   * and end this scripts execution
    */
-  const sleep = (time = 1) => {
-    return new Promise(/** @type {() => void} */(res) => {
-      setTimeout(() => { res() }, time * 1000);
-    });
-  };
-
-  const onOpenLinks = async () => {
-    const text = openLinksArea.value;
-    const lines = text.split("\n");
-    for (const line of lines) {
-      if (line === "" || IGNORED_LINES.some(comment => line.startsWith(comment))) {
-        continue;
+  const onOpenLinks = () => {
+    /**
+     * @type {Message<{ links: string }>}
+     */
+    const message = {
+      type: OPEN_LINKS,
+      payload: {
+        links: openLinksArea.value,
       }
+    };
 
-      // Does not work
-      // await chrome.tabs.create({ url: line  });
-      await sleep();
+    switch (BROWSER) {
+      case CHROME: {
+        sendMessageWorker(message);
+        break;
+      }
+      case FIREFOX: {
+        sendMessageBackground(message);
+        break;
+      }
+      default:
+        error('Unknown browser');
+        break;
     }
   };
 
+  /**
+   * Initialize tabs to handle click and render proper page
+   */
   const initialTabsSetup = () => {
     // Mark first tab as current
     const tabs = Array.from(/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tab')));
@@ -1041,11 +1135,41 @@
     tabs[0].click();
   };
 
-  const onWindowsLoad = async () => {
-    const { allWindows, useRegexp } = await getStorage(STORAGE.CONFIG);
-    allWindowsCheckbox.checked = !!allWindows;
-    useRegexpCheckbox.checked = !!useRegexp;
+  /**
+   * Initialize popovers to show on hover (mouseover/mouseout)
+   */
+  const startTooltips = () => {
+    const elements = Array.from(/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(ELEMENTS_WITH_POPOVERS)));
 
+    for (const element of elements) {
+      const target = /** @type {HTMLElement} */ (document.querySelector(`#${element.getAttribute(POPOVERTARGET)}`));
+
+      if (!target) {
+        continue;
+      }
+
+      element.addEventListener(MOUSEOVER,()=>{
+        target.showPopover();
+      });
+      
+      element.addEventListener(MOUSEOUT,()=>{
+        target.hidePopover();
+      });
+    }
+  };
+
+  /**
+   * Startup popup logic
+   */
+  const onWindowsLoad = async () => {
+    // const {} = await 
+    getStorage(STORAGE.CONFIG).then(({ allWindows, useRegexp, openDelay }) => {
+      allWindowsCheckbox.checked = !!allWindows;
+      useRegexpCheckbox.checked = !!useRegexp;
+      // @ts-expect-error Set current value even if number
+      delayInput.value = openDelay ?? DEFAULT_DELAY;
+    });
+    startTooltips();
     setBrowserSpecificStyles();
     getLinksHandler();
     updateSearchPlaceholder();
@@ -1065,6 +1189,8 @@
     openBtn.addEventListener(CLICK, onOpenLinks);
     fileInput.addEventListener(CHANGE, onSelectedFiles);
     fileBtn .addEventListener(CLICK, onOpenFilesClick);
+    delayInput.addEventListener(CHANGE, debouncedSaveDelayTime);
+    delayInput.addEventListener(KEYDOWN, debouncedSaveDelayTime);
     window.addEventListener(LOAD, onWindowsLoad);
     set_notification_handlers();
   };

@@ -60,10 +60,15 @@
     <div class="page open-page">
       <textarea name="links-to-open" id="links-to-open"></textarea>
       <div id="open-btn-area" class="btn-area">
-        <button id="open-btn" class="btn open-links">Open</button>
+        <button id="open-btn" class="btn open-links" >Open</button>
+
+        <input id="delay-input" class="" type="number" step="any" popovertarget="delay-tooltip" data-trigger="hover">
+        <div popover anchor="delay-input" id="delay-tooltip" class="tooltip">Delay in seconds to open each link</div>
+
         <!-- Hide real input and use mock button instead -->
         <input id="file-input" class="hide" type="file" multiple>
-        <button id="file-btn" class="btn open-links">Select files</button>
+        <button id="file-btn" class="btn open-links" popovertarget="open-file-tooltip" data-trigger="hover">Select files</button>
+        <!-- <div popover anchor="file-btn" id="open-file-tooltip" class="tooltip">Does not work on Firefox</div> -->
       </div>
     </div>
 

@@ -425,6 +425,26 @@ body {
   transform: rotate(180deg);
 }
 
+#delay-input {
+  anchor-name: --delay-input-anchor;
+  width: 60px;
+}
+
+#delay-tooltip {
+  bottom: anchor(--delay-input-anchor top);
+  margin-bottom: 5px;
+}
+
+.tooltip {
+  position: absolute;
+  border-radius: 0.5rem;
+  font-size: .5rem;
+  background-color: var(--theme-odds);
+  color: var(--theme-text);
+  border: 1px solid var(--theme-text);
+  padding: 5px;
+}
+
 .hide {
   display: none !important;
 }
