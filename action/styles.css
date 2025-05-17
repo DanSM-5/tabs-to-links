@@ -78,7 +78,7 @@ body {
     box-sizing: border-box;
     border: none;
     border-bottom-style: solid;
-    border-bottom-width: 2px;
+    border-bottom-width: 3px;
     border-bottom-color: transparent;
     cursor: pointer;
     
@@ -90,6 +90,7 @@ body {
 
   .tab.active {
     border-bottom-color: var(--border-bottom-color);
+    font-style: italic;
   }
 
   .tab:hover,
