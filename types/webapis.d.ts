@@ -10,3 +10,6 @@ interface ErrorConstructor {
   new (message?: string, options?: { cause?: unknown })
 }
 
+interface Window {
+  sendBackgroundMessage: <T = any, R = any>(message: T) => BackgroundResponse<R>;
+}

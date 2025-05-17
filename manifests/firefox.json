@@ -8,6 +8,9 @@
     "tabs",
     "notifications"
   ],
+  "background": {
+    "scripts": ["background/script.js"]
+  },
   "browser_action": {
     "default_popup": "action/index.html",
     "browser_style": true

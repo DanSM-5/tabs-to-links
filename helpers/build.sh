@@ -35,6 +35,7 @@ mkdir -p "$DIST_PATH"
 cp -r action "$BUILD_PATH"
 cp -r img "$BUILD_PATH"
 cp -r icons "$BUILD_PATH"
+cp -r background "$BUILD_PATH"
 cp "manifests/$BROWSER_MANIFEST" "$BUILD_PATH/$MANIFEST"
 
 sed -r -i'.bak' -e "s/\{\{VERSION\}\}/$VERSION/g" "$BUILD_PATH/$MANIFEST"

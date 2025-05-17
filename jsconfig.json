@@ -2,16 +2,20 @@
   "compilerOptions": {
     "strict": true,
     "target": "es6",
+    "isolatedModules": true,
+    "moduleDetection": "force",
     "lib": [
       "ESNext",
       "dom"
     ],
     "typeRoots": [
       "./node_modules/@types",
-      "./types/*.d.ts"
+      "./types"
     ]
   },
   "include": [
-    "./action/**/*"
+    "./action/**/*",
+    "./background/**/*",
+    "./types/**.d.ts"
   ]
 }

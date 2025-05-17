@@ -8,6 +8,9 @@
     "tabs",
     "notifications"
   ],
+  "background": {
+    "service_worker": "background/worker.js"
+  },
   "action": {
     "default_popup": "action/index.html"
   },
