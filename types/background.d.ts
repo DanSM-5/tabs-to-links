@@ -14,3 +14,5 @@ interface BackgroundResponse<T = any> {
   status: Status;
   payload: T;
 }
+
+type OpenLinksMessage = Message<{ links: string; delay: number }>;

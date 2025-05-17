@@ -21,8 +21,9 @@ const sleep = (time = 1) => {
 
 /**
  * @param {string} text List of links in a single string
+ * @param {number} delay Time to sleep between links being opened
  */
-const openLinks = async (text) => {
+const openLinks = async (text, delay) => {
   const links = text.split("\n");
   for (const link of links) {
     if (link === "" || IGNORED_LINES.some(commentStart => link.startsWith(commentStart))) {
@@ -31,7 +32,7 @@ const openLinks = async (text) => {
 
     // Does not work
     await chrome.tabs.create({ url: link  });
-    await sleep();
+    await sleep(delay);
   }
 };
 
@@ -66,7 +67,7 @@ chrome.runtime.onMessage.addListener(
 
     switch (type) {
       case OPEN_LINKS: {
-        const { links } = /** @type {{links: string}} */ (request.payload);
+        const { links, delay } = /** @type {OpenLinksMessage['payload']} */ (request.payload);
         /** @type {BackgroundResponse<{ message: 'ok' }>} */
         const response = {
           status: STATUS.SUCCESS,
@@ -74,7 +75,7 @@ chrome.runtime.onMessage.addListener(
         }
 
         sendResponse(response);
-        await openLinks(links);
+        await openLinks(links, delay);
         return;
       }
       default: {

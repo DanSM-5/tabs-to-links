@@ -21,8 +21,9 @@ const sleep = (time = 1) => {
 
 /**
  * @param {string} text List of links in a single string
+ * @param {number} delay Time to sleep between links being opened
  */
-const openLinks = async (text) => {
+const openLinks = async (text, delay) => {
   const links = text.split("\n");
   for (const link of links) {
     if (link === "" || IGNORED_LINES.some(commentStart => link.startsWith(commentStart))) {
@@ -31,7 +32,7 @@ const openLinks = async (text) => {
 
     // Does not work
     await chrome.tabs.create({ url: link  });
-    await sleep();
+    await sleep(delay);
   }
 };
 
@@ -51,7 +52,20 @@ const getFailureResponse = (reason) => {
 };
 
 /**
+ * Function that handled messages to the background page
+ * It is imperative that the function is defined with the
+ * "function" keyword and not as an arrow function.
  * @param {Message|undefined} message Message to process in background
+ * @example ```javascript
+ * const message = {
+ *   type: OPEN_LINKS,
+ *   payload: {
+ *     links: "https://foo.bar",
+ *     delay: 2,
+ *   }
+ * };
+ * const response = backgroundPage.sendBackgroundMessage(message);
+ * ```
  */
 async function sendBackgroundMessage(message) {
   if (!message) {
@@ -64,14 +78,14 @@ async function sendBackgroundMessage(message) {
 
   switch (type) {
     case OPEN_LINKS: {
-      const { links } = /** @type {{links: string}} */ (message.payload);
+      const { links, delay } = /** @type {OpenLinksMessage['payload']} */ (message.payload);
       /** @type {BackgroundResponse<{ message: 'ok' }>} */
       const response = {
         status: STATUS.SUCCESS,
         payload: { message: OK },
       }
 
-      openLinks(links);
+      openLinks(links, delay);
       return response;
     }
     default: {

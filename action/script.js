@@ -1020,10 +1020,22 @@
    */
   const debouncedSearch = debounceFunction(searchHandler, searchTimerRef);
 
-  const saveDelayTime = () => {
+  /**
+   * Utility to get a valid value from the delay input
+   * @returns {number} Number from delayInput or DEFAULT_DELAY
+   */
+  const getDelayValue = () => {
     const current = delayInput.value;
     const converted = Number.parseFloat(current);
-    const openDelay = Number.isNaN(converted) ? DEFAULT_DELAY : converted;
+    return Number.isNaN(converted) ? DEFAULT_DELAY : converted;
+  };
+
+  /**
+   * Save the current value from delayInput into sync storage to persist
+   * across launches
+   */
+  const saveDelayTime = () => {
+    const openDelay = getDelayValue();
     setStorage(STORAGE.CONFIG, { openDelay }).catch((e) => {
       error(`[Storage] Error updating config.openDelay to ${openDelay}`, e);
     });
@@ -1097,12 +1109,13 @@
    */
   const onOpenLinks = () => {
     /**
-     * @type {Message<{ links: string }>}
+     * @type {OpenLinksMessage}
      */
     const message = {
       type: OPEN_LINKS,
       payload: {
         links: openLinksArea.value,
+        delay: getDelayValue(),
       }
     };
 
