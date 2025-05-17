@@ -45,6 +45,9 @@
   const txtArea = /** @type {HTMLTextAreaElement} */ (
     document.querySelector("#txt-box")
   );
+  const tabContainer = /** @type {HTMLDivElement} */ (
+    document.querySelector(".tab-container")
+  )
   const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
   const t2lIcon = "../icons/icon128.png";
@@ -87,6 +90,9 @@
   const CLOSE_BUTTON = "close-button";
   const CLOSE_BUTTON_CONTAINER = "close-button-container";
   const BUTTON_WRAPPER = "button-wrapper";
+  const ACTIVE_TAB = "active";
+  const OPEN_PAGE = "open-page";
+  const COPY_PAGE = "copy-page";
   // Array Methods
   const EVERY = "every";
   const SOME = "some";
@@ -935,10 +941,41 @@
     observer.observe(txtArea, config);
   };
 
+  /**
+   * @param {MouseEvent} evt
+   */
+  const onTabClick = (evt) => {
+    const tab = /** @type {HTMLElement | null} */ (evt.target);
+    if (!tab) {
+      return;
+    }
+
+    const isOpenTab = tab.classList.contains(OPEN_PAGE);
+    const [showClass, hideClass] = isOpenTab ? [OPEN_PAGE, COPY_PAGE] : [COPY_PAGE, OPEN_PAGE];
+
+    // Set tab active
+    tabContainer.querySelector(`.tab.${hideClass}`)?.classList.remove(ACTIVE_TAB);
+    tabContainer.querySelector(`.tab.${showClass}`)?.classList.add(ACTIVE_TAB);
+
+    // Set display tab
+    document.querySelector(`.page.${hideClass}`)?.classList.add(HIDE);
+    document.querySelector(`.page.${showClass}`)?.classList.remove(HIDE);
+  };
+
   const onWindowsLoad = async () => {
     const { allWindows, useRegexp } = await getStorage(STORAGE.CONFIG);
     allWindowsCheckbox.checked = !!allWindows;
     useRegexpCheckbox.checked = !!useRegexp;
+
+    // Mark first tab as current
+    const tabs = Array.from(/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tab')));
+    for (let i = 0; i < tabs.length; ++i) {
+      const tab = tabs[i];
+      tab.addEventListener(CLICK, onTabClick);
+      if (i === 0) {
+        tab.classList.add(ACTIVE_TAB);
+      }
+    }
 
     setBrowserSpecificStyles();
     getLinksHandler();

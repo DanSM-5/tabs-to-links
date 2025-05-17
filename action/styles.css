@@ -73,11 +73,20 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    border: none;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: transparent;
+    cursor: pointer;
+    
+    span {
+      color: var(--theme-text);
+      pointer-events: none;
+    }
   }
 
   .tab.active {
-    border-bottom-style: solid;
-    border-bottom-width: 2px;
     border-bottom-color: var(--border-bottom-color);
   }
 }

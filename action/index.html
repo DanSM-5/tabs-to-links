@@ -9,41 +9,50 @@
 </head>
 <body>
   <div id="main">
-    <div id="search-wrapper">
-      <button id="search-btn" class="button-wrapper search-button">
-        <img src="../img/search-logo.svg" alt="search-logo" class="tab-icon">
-      </button>
-      <div class="search-box-wrapper">
-        <input
-          type="text"
-          name="search-box"
-          id="search-box"
-          class="search-box"
-          placeholder="Search using regex"
-        >
+    <div class="tab-container">
+      <button class="tab copy-page"><span><b>Copy Links</b></span></button>
+      <button class="tab open-page"><span><b>Open Links</b></span></button>
+    </div>
+    <div class="page copy-page">
+      <div id="search-wrapper">
+        <button id="search-btn" class="button-wrapper search-button">
+          <img src="../img/search-logo.svg" alt="search-logo" class="tab-icon">
+        </button>
+        <div class="search-box-wrapper">
+          <input
+            type="text"
+            name="search-box"
+            id="search-box"
+            class="search-box"
+            placeholder="Search using regex"
+          >
+        </div>
+        <button id="use-regexp-btn" class="btn btn-checked">
+          <span>Regex</span>
+          <input type="checkbox" name="all-windows" id="use-regexp" class="ignore-button" tabindex="-1">
+        </button>
       </div>
-      <button id="use-regexp-btn" class="btn btn-checked">
-        <span>Regex</span>
-        <input type="checkbox" name="all-windows" id="use-regexp" class="ignore-button" tabindex="-1">
-      </button>
+      <div class="txt-box-container">
+        <div name="txt-box" id="txt-box" class="txt-box"></div>
+      </div>
+      <div id="btn-area">
+        <button id="all-windows-btn" class="btn btn-checked">
+          <span>All</span>
+          <input type="checkbox" name="all-windows" id="all-windows" class="ignore-button" tabindex="-1">
+        </button>
+        <button id="reset-btn" class="btn btn-main">
+          <span>Reset</span>
+        </button>
+        <button id="download-btn" class="btn btn-download">
+          <span>Download</span>
+        </button>
+        <button id="copy-btn" class="btn btn-copy">
+          <span>Copy</span>
+        </button>
+      </div>
     </div>
-    <div class="txt-box-container">
-      <div name="txt-box" id="txt-box" class="txt-box"></div>
-    </div>
-    <div id="btn-area">
-      <button id="all-windows-btn" class="btn btn-checked">
-        <span>All</span>
-        <input type="checkbox" name="all-windows" id="all-windows" class="ignore-button" tabindex="-1">
-      </button>
-      <button id="reset-btn" class="btn btn-main">
-        <span>Reset</span>
-      </button>
-      <button id="download-btn" class="btn btn-download">
-        <span>Download</span>
-      </button>
-      <button id="copy-btn" class="btn btn-copy">
-        <span>Copy</span>
-      </button>
+    <div class="page open-page">
+
     </div>
   </div>
   <script src="script.js"></script>
