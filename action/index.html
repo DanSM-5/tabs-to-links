@@ -9,10 +9,14 @@
 </head>
 <body>
   <div id="main">
+
+    <!-- Tabs -->
     <div class="tab-container">
       <button class="tab copy-page"><span><b>Copy Links</b></span></button>
       <button class="tab open-page"><span><b>Open Links</b></span></button>
     </div>
+
+    <!-- Copy links page -->
     <div class="page copy-page">
       <div id="search-wrapper">
         <button id="search-btn" class="button-wrapper search-button">
@@ -35,7 +39,7 @@
       <div class="txt-box-container">
         <div name="txt-box" id="txt-box" class="txt-box"></div>
       </div>
-      <div id="btn-area">
+      <div id="btn-area" class="btn-area">
         <button id="all-windows-btn" class="btn btn-checked">
           <span>All</span>
           <input type="checkbox" name="all-windows" id="all-windows" class="ignore-button" tabindex="-1">
@@ -51,9 +55,16 @@
         </button>
       </div>
     </div>
-    <div class="page open-page">
 
+    <!-- Open links page -->
+    <div class="page open-page">
+      <textarea name="links-to-open" id="links-to-open"></textarea>
+      <div id="open-btn-area" class="btn-area">
+        <button id="open-btn" class="btn open-links">Open</button>
+        <input type="file" id="file-input" multiple>
+      </div>
     </div>
+
   </div>
   <script src="script.js"></script>
 </body>
