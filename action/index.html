@@ -61,7 +61,9 @@
       <textarea name="links-to-open" id="links-to-open"></textarea>
       <div id="open-btn-area" class="btn-area">
         <button id="open-btn" class="btn open-links">Open</button>
-        <input type="file" id="file-input" multiple>
+        <!-- Hide real input and use mock button instead -->
+        <input id="file-input" class="hide" type="file" multiple>
+        <button id="file-btn" class="btn open-links">Select files</button>
       </div>
     </div>
 

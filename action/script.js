@@ -51,6 +51,9 @@
   const fileInput = /** @type {HTMLInputElement} */ (
     document.querySelector("#file-input")
   )
+  const fileBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector("#file-btn")
+  );
   const openLinksArea = /** @type {HTMLTextAreaElement} */ (
     document.querySelector("#links-to-open")
   )
@@ -114,6 +117,7 @@
   const NOTIFICATION_TITLE = "Copied to clipboard";
   const BEFORE_UNLOAD = "beforeunload";
   const TYPE_BASIC = "basic";
+  const LINKS_AREA_MESSAGE = "// Add your links here\n// lines starting with '//', '#', and ';'\n// will be ignored\n";
   const IGNORED_LINES = ['//', '#', ';'];
 
   // Storage keys
@@ -849,7 +853,7 @@
     link.click();
   };
 
-  const updatePlaceholder = () => {
+  const updateSearchPlaceholder = () => {
     if (useRegexpCheckbox.checked) {
       searchBox.placeholder = SEARCH_BY_REGEXP;
     } else {
@@ -868,7 +872,7 @@
 
     // Need to update the search
     searchHandler();
-    updatePlaceholder();
+    updateSearchPlaceholder();
   };
 
   const checkAllWindowsHandler = () => {
@@ -973,7 +977,7 @@
     document.querySelector(`.page.${showClass}`)?.classList.remove(HIDE);
   };
 
-  const onSelectedFile = async () => {
+  const onSelectedFiles = async () => {
     const files = /** @type {File[]|null} */ (fileInput.files);
     if (!files || files?.length === 0) {
       // No selected files
@@ -999,6 +1003,10 @@
     openLinksArea.value = currText;
   };
 
+  const onOpenFilesClick = () => {
+    fileInput.click();
+  };
+
   /**
    * @param {number} time Sleep time in seconds
    */
@@ -1022,24 +1030,27 @@
     }
   };
 
-  const onWindowsLoad = async () => {
-    const { allWindows, useRegexp } = await getStorage(STORAGE.CONFIG);
-    allWindowsCheckbox.checked = !!allWindows;
-    useRegexpCheckbox.checked = !!useRegexp;
-
+  const initialTabsSetup = () => {
     // Mark first tab as current
     const tabs = Array.from(/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tab')));
     for (let i = 0; i < tabs.length; ++i) {
       const tab = tabs[i];
       tab.addEventListener(CLICK, onTabClick);
     }
+    openLinksArea.value = LINKS_AREA_MESSAGE;
     tabs[0].click();
-    openLinksArea.value = "// Add your links here\n// lines starting with '//', '#', and ';'\n// will be ignored\n";
+  };
+
+  const onWindowsLoad = async () => {
+    const { allWindows, useRegexp } = await getStorage(STORAGE.CONFIG);
+    allWindowsCheckbox.checked = !!allWindows;
+    useRegexpCheckbox.checked = !!useRegexp;
 
     setBrowserSpecificStyles();
     getLinksHandler();
-    updatePlaceholder();
+    updateSearchPlaceholder();
     searchBox.focus();
+    initialTabsSetup();
     // setObserverTxtArea();
   };
 
@@ -1052,7 +1063,8 @@
     downloadBtn.addEventListener(CLICK, downloadHandler);
     copyBtn.addEventListener(CLICK, copyHandler);
     openBtn.addEventListener(CLICK, onOpenLinks);
-    fileInput.addEventListener(CHANGE, onSelectedFile);
+    fileInput.addEventListener(CHANGE, onSelectedFiles);
+    fileBtn .addEventListener(CLICK, onOpenFilesClick);
     window.addEventListener(LOAD, onWindowsLoad);
     set_notification_handlers();
   };
