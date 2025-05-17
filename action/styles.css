@@ -58,6 +58,7 @@ body {
   --container-background-color: var(--theme-hover);
   --tab-background-color: var(--theme);
   --active-shadow-color: var(--theme-button-hover);
+  --border-bottom-color-hover: var(--theme-button-hover);
   width: 100%;
   height: var(--row-height);
   display: flex;
@@ -96,6 +97,7 @@ body {
   .tab:hover,
   .tab:focus-visible {
     box-shadow: inset 0 0px 10px var(--border-bottom-color);
+    border-bottom-color: var(--border-bottom-color-hover);
     outline: none;
   }
 
@@ -432,7 +434,7 @@ body {
 
 #delay-tooltip {
   bottom: anchor(--delay-input-anchor top);
-  margin-bottom: 5px;
+  margin-bottom: var(--delay-tooltip-margin);
 }
 
 .tooltip {
@@ -447,6 +449,16 @@ body {
 
 .hide {
   display: none !important;
+}
+
+/* On firefox it is not possible to open a file */
+/* dialog without closing the popup which causes */
+/* the read file logic to stop unexpectedly. */
+/* Need to investigate a workaround. Suggestions include: */
+/* - Crea a new window `browser.window.create` and move the open links UI there. */
+/* Do not display for now */
+#main.firefox #file-btn {
+  display: none;
 }
 
 @media (prefers-color-scheme: ligth) {

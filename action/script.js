@@ -63,6 +63,9 @@
   const delayInput = /** @type {HTMLInputElement} */ (
     document.querySelector("#delay-input")
   );
+  const mainContainer = /** @type {HTMLDivElement} */ (
+    document.querySelector("#main")
+  );
   const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
   const t2lIcon = "../icons/icon128.png";
@@ -217,8 +220,16 @@
   };
   // Browser Specific
   const BROWSER_CSS_VARIABLES = {
-    [CHROME]: ["--txt-box-width: 400px", "--list-right-padding: 0"],
-    [FIREFOX]: ["--txt-box-width: 340px", "--list-right-padding: 10px"],
+    [CHROME]: [
+      "--txt-box-width: 400px",
+      "--list-right-padding: 0",
+      "--delay-tooltip-margin: 5px",
+    ],
+    [FIREFOX]: [
+      "--txt-box-width: 340px",
+      "--list-right-padding: 10px",
+      "--delay-tooltip-margin: var(--row-height)",
+    ],
   };
 
   /**
@@ -296,13 +307,15 @@
    * firefox and chromium browsers
    */
   const setBrowserSpecificStyles = () => {
+    // Append specific variables sets to the :root
     const browserVars = BROWSER_CSS_VARIABLES[BROWSER];
-
     const stylesString = browserVars.join(";");
-
     const styles = `:root {${stylesString}}`;
-
     addCssStyle(styles);
+
+    // Add top level class name to target specific
+    // selectors at the css level
+    mainContainer.classList.add(BROWSER);
   };
 
   /**
