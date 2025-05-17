@@ -35,6 +35,7 @@
   --ui-left-separation: 3px;
   --row-height: 45px;
   --link-area-height: 335px;
+  --link-text-area-height: 300px;
 }
 
 body {
@@ -56,6 +57,7 @@ body {
   --border-bottom-color: var(--theme-button);
   --container-background-color: var(--theme-hover);
   --tab-background-color: var(--theme);
+  --active-shadow-color: var(--theme-button-hover);
   width: 100%;
   height: var(--row-height);
   display: flex;
@@ -89,6 +91,41 @@ body {
   .tab.active {
     border-bottom-color: var(--border-bottom-color);
   }
+
+  .tab:hover,
+  .tab:focus-visible {
+    box-shadow: inset 0 0px 10px var(--border-bottom-color);
+    outline: none;
+  }
+
+  .tab:active {
+    box-shadow: inset 0 0px 10px var(--active-shadow-color);
+  }
+}
+
+.page.open-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 5px;
+}
+
+#links-to-open {
+  height: var(--link-text-area-height);
+  width: 100%;
+  background-color: var(--theme);
+  color: var(--theme-text);
+  box-sizing: border-box;
+  margin-top: 5px;
+  border-radius: 10px;
+  /* border: 5px solid transparent; */
+}
+
+#links-to-open:focus-within,
+#links-to-open:focus-visible {
+  /* background: var(--theme-btn-wrapper-hover); */
+  outline: dotted;
+  outline-color: var(--theme-button-hover);
 }
 
 #search-wrapper {
@@ -246,11 +283,16 @@ body {
   background-color: var(--theme-hover);
 }
 
-#btn-area {
+.btn-area {
   display: flex;
   width: 100%;
   justify-content: space-evenly;
+  height: 30px;
   margin: 10px 0;
+
+  .btn {
+    height: 30px;
+  }
 }
 
 .button-wrapper {
@@ -382,7 +424,7 @@ body {
 }
 
 .hide {
-  display: none;
+  display: none !important;
 }
 
 @media (prefers-color-scheme: ligth) {
