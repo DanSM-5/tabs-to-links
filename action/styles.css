@@ -4,10 +4,13 @@
   --dark-theme-odds: hsl(225, 5%, 19%);
   --dark-theme-hover: hsl(225, 6%, 30%);
   --dark-theme-text: hsl(0, 5%, 90%);
+  /* Icon buttons */
   --dark-theme-btn-wrapper-hover: hsla(174, 100%, 25%, 0.5);
   --dark-theme-btn-wrapper-active: hsla(174, 100%, 22%, 0.5);
+  /* Buttons */
   --dark-theme-button: hsl(174, 100%, 25%);
   --dark-theme-button-hover: hsl(174, 100%, 22%);
+  --dark-theme-button-active: hsl(174, 100%, 30%);
   --dark-theme-button-text: hsl(0, 5%, 90%);
   --dark-theme-scroll-background: hsl(0, 0%, 30%);
   --dark-theme-scroll-color: hsl(0, 0%, 0%);
@@ -17,10 +20,13 @@
   --light-theme-odds: hsl(208, 100%, 97%);
   --light-theme-hover: hsl(0, 0%, 94%);
   --light-theme-text: hsl(0, 0, 0%);
+  /* Icon buttons */
   --light-theme-btn-wrapper-hover: hsla(210, 100%, 60%, 0.5);
   --light-theme-btn-wrapper-active: hsla(210, 100%, 45%, 0.5);
+  /* Buttons */
   --light-theme-button: hsl(210, 100%, 60%);
   --light-theme-button-hover: hsl(210, 100%, 45%);
+  --light-theme-button-active: hsl(210, 100%, 65%);
   --light-theme-button-text: hsl(0, 0%, 100%);
   --light-theme-scroll-background: hsl(0, 0%, 90%);
   --light-theme-scroll-color: hsl(0, 0%, 60%);
@@ -163,7 +169,6 @@ body {
   text-shadow: unset;
   text-align: unset;
   align-items: unset;
-  background-color: unset;
   box-sizing: unset;
   margin: unset;
   font: unset;
@@ -173,6 +178,7 @@ body {
   border-color: unset;
   border-image: initial;
   background: unset;
+  background-color: unset;
   appearance: unset;
   -webkit-writing-mode: unset;
   -moz-writing-mode: unset;
@@ -256,6 +262,10 @@ body {
 
 .btn:hover {
   background-color: var(--light-theme-button-hover);
+}
+
+.btn:active {
+  background-color: var(--light-theme-button-active);
 }
 
 .btn-checked {
@@ -353,6 +363,9 @@ body {
   .btn:hover {
     background-color: var(--light-theme-button-hover);
   }
+  .btn:active {
+    background-color: var(--light-theme-button-active);
+  }
   .txt-box {
     scrollbar-color: var(--light-theme-scroll-color) var(--light-theme-scroll-background);
   }
@@ -411,6 +424,9 @@ body {
   }
   .btn:hover {
     background-color: var(--dark-theme-button-hover);
+  }
+  .btn:active {
+    background-color: var(--dark-theme-button-active);
   }
   .txt-box {
     scrollbar-color: var(--dark-theme-scroll-color) var(--dark-theme-scroll-background);
