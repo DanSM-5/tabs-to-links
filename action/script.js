@@ -48,6 +48,15 @@
   const tabContainer = /** @type {HTMLDivElement} */ (
     document.querySelector(".tab-container")
   )
+  const fileInput = /** @type {HTMLInputElement} */ (
+    document.querySelector("#file-input")
+  )
+  const openLinksArea = /** @type {HTMLTextAreaElement} */ (
+    document.querySelector("#links-to-open")
+  )
+  const openBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector("#open-btn")
+  );
   const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
   const t2lIcon = "../icons/icon128.png";
@@ -56,6 +65,7 @@
   // Constants
   const BLUR = "blur";
   const CLICK = "click";
+  const CHANGE = "change";
   const LOAD = "load";
   const ERROR = "error";
   const WARN = "warn";
@@ -104,6 +114,7 @@
   const NOTIFICATION_TITLE = "Copied to clipboard";
   const BEFORE_UNLOAD = "beforeunload";
   const TYPE_BASIC = "basic";
+  const IGNORED_LINES = ['//', '#', ';'];
 
   // Storage keys
   /**
@@ -962,6 +973,55 @@
     document.querySelector(`.page.${showClass}`)?.classList.remove(HIDE);
   };
 
+  const onSelectedFile = async () => {
+    const files = /** @type {File[]|null} */ (fileInput.files);
+    if (!files || files?.length === 0) {
+      // No selected files
+      return;
+    }
+
+    let currText = openLinksArea.value || '';
+
+    for (const file of files) {
+      // Do not attempt to read from images
+      if (file.type.startsWith('image/')) {
+        continue;
+      }
+
+      try {
+        const text = await file.text();
+        currText = currText === '' ? text : `${currText}\n${text}`;
+      } catch (err) {
+        error(`[Read] Unable to read file: ${file.name}`, err);
+      }
+    }
+
+    openLinksArea.value = currText;
+  };
+
+  /**
+   * @param {number} time Sleep time in seconds
+   */
+  const sleep = (time = 1) => {
+    return new Promise(/** @type {() => void} */(res) => {
+      setTimeout(() => { res() }, time * 1000);
+    });
+  };
+
+  const onOpenLinks = async () => {
+    const text = openLinksArea.value;
+    const lines = text.split("\n");
+    for (const line of lines) {
+      if (line === "" || IGNORED_LINES.some(comment => line.startsWith(comment))) {
+        continue;
+      }
+
+      // Does not work
+      // await chrome.tabs.create({ url: line  });
+      await sleep();
+    }
+  };
+
   const onWindowsLoad = async () => {
     const { allWindows, useRegexp } = await getStorage(STORAGE.CONFIG);
     allWindowsCheckbox.checked = !!allWindows;
@@ -972,10 +1032,9 @@
     for (let i = 0; i < tabs.length; ++i) {
       const tab = tabs[i];
       tab.addEventListener(CLICK, onTabClick);
-      if (i === 0) {
-        tab.classList.add(ACTIVE_TAB);
-      }
     }
+    tabs[0].click();
+    openLinksArea.value = "// Add your links here\n// lines starting with '//', '#', and ';'\n// will be ignored\n";
 
     setBrowserSpecificStyles();
     getLinksHandler();
@@ -992,6 +1051,8 @@
     resetBtn.addEventListener(CLICK, getLinksHandler);
     downloadBtn.addEventListener(CLICK, downloadHandler);
     copyBtn.addEventListener(CLICK, copyHandler);
+    openBtn.addEventListener(CLICK, onOpenLinks);
+    fileInput.addEventListener(CHANGE, onSelectedFile);
     window.addEventListener(LOAD, onWindowsLoad);
     set_notification_handlers();
   };
