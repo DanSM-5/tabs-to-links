@@ -425,7 +425,7 @@
     // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
     document
       .querySelectorAll(ALL_ROWS)
-      .forEach((i) => i.classList.remove(HIDE));
+      .forEach((i) => void i.classList.remove(HIDE));
   };
 
   /**
