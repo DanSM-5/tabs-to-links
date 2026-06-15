@@ -204,13 +204,16 @@
   };
 
   /**
-   * Send a message to a service worker. This should be used for
-   * chromium based browsers only due to MV3
+   * Send a message to the background script. Works on both Chrome (MV3 service
+   * worker) and Firefox (MV2 persistent background page) because both receive
+   * it through a runtime.onMessage listener. Delegating the work to the
+   * background keeps it running after the popup closes (opening links steals
+   * focus and dismisses the popup).
    *
    * @template T=any
    * @template R=any
-   * @param {Message<T>} message Message to send to chrome service worker
-   * @returns {Promise<BackgroundResponse<R> | Error>} Message response from service worker
+   * @param {Message<T>} message Message to send to the background script
+   * @returns {Promise<BackgroundResponse<R> | Error>} Message response from the background script
    */
   const sendMessageWorker = async (message) => {
     try {
@@ -221,25 +224,6 @@
       return error instanceof Error ? error : new Error(`${error}`);
     }
   };
-
-  /**
-   * Send a message to a service worker. This should be used for
-   * chromium based browsers only due to MV3
-   *
-   * @template T=any
-   * @template R=any
-   * @param {Message<T>} message Message to send to chrome service worker
-   * @returns {Promise<BackgroundResponse<R> | Error>} Message response from service worker
-   */
-  const sendMessageBackground = async (message) => {
-    const backgroundPage = chrome.extension.getBackgroundPage();
-    if (!backgroundPage) {
-      return Promise.reject(new Error('No background script found'));
-    }
-
-    const response = backgroundPage.sendBackgroundMessage(message);
-    return response instanceof Promise ? response : Promise.resolve(response);
-  }
 
   // Storage keys
   /**
@@ -1548,19 +1532,9 @@
       }
     };
 
-    switch (BROWSER) {
-      case CHROME: {
-        sendMessageWorker(message);
-        break;
-      }
-      case FIREFOX: {
-        sendMessageBackground(message);
-        break;
-      }
-      default:
-        error('Unknown browser');
-        break;
-    }
+    // Both Chrome and Firefox handle this through a runtime.onMessage listener
+    // in their background script, so the loop survives the popup closing.
+    sendMessageWorker(message);
   };
 
   /**

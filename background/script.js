@@ -30,7 +30,6 @@ const openLinks = async (text, delay) => {
       continue;
     }
 
-    // Does not work
     await chrome.tabs.create({ url: link  });
     await sleep(delay);
   }
@@ -51,47 +50,45 @@ const getFailureResponse = (reason) => {
   return response;
 };
 
-/**
- * Function that handled messages to the background page
- * It is imperative that the function is defined with the
- * "function" keyword and not as an arrow function.
- * @param {Message|undefined} message Message to process in background
- * @example ```javascript
- * const message = {
- *   type: OPEN_LINKS,
- *   payload: {
- *     links: "https://foo.bar",
- *     delay: 2,
- *   }
- * };
- * const response = backgroundPage.sendBackgroundMessage(message);
- * ```
- */
-async function sendBackgroundMessage(message) {
-  if (!message) {
-    const reason = "No request in message";
-    console.warn(reason);
-    return getFailureResponse(reason);
-  }
-
-  const { type } =  message;
-
-  switch (type) {
-    case OPEN_LINKS: {
-      const { links, delay } = /** @type {OpenLinksMessage['payload']} */ (message.payload);
-      /** @type {BackgroundResponse<{ message: 'ok' }>} */
-      const response = {
-        status: STATUS.SUCCESS,
-        payload: { message: OK },
-      }
-
-      openLinks(links, delay);
-      return response;
-    }
-    default: {
-      const reason = `No handler for type: ${type}`;
+// Firefox (MV2) persistent background page. The popup talks to it through
+// runtime.sendMessage (same as the Chrome worker), so the open-links loop runs
+// here and keeps going after the popup closes when the first tab steals focus.
+chrome.runtime.onMessage.addListener(
+  /**
+   * @param {Message|undefined} request
+   * @param {chrome.runtime.MessageSender} _sender
+   * @param {(response: BackgroundResponse) => void} sendResponse
+   */
+  (request, _sender, sendResponse) => {
+    if (!request) {
+      const reason = "No request in message";
       console.warn(reason);
-      return getFailureResponse(reason);
+      sendResponse(getFailureResponse(reason));
+      return;
+    }
+
+    const { type } = request;
+
+    switch (type) {
+      case OPEN_LINKS: {
+        const { links, delay } = /** @type {OpenLinksMessage['payload']} */ (request.payload);
+        /** @type {BackgroundResponse<{ message: 'ok' }>} */
+        const response = {
+          status: STATUS.SUCCESS,
+          payload: { message: OK },
+        }
+
+        // Respond synchronously, then run the loop detached from the popup.
+        sendResponse(response);
+        openLinks(links, delay);
+        return;
+      }
+      default: {
+        const reason = `No handler for type: ${type}`;
+        console.warn(reason);
+        sendResponse(getFailureResponse(reason));
+        return;
+      }
     }
   }
-};
+);
