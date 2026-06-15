@@ -16,157 +16,158 @@
 ((_) => {
   // HTML Elements
   const allWindowsCheckbox = /** @type {HTMLInputElement} */ (
-    document.querySelector("#all-windows")
+    document.querySelector('#all-windows')
   );
   const allWindowsBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector("#all-windows-btn")
+    document.querySelector('#all-windows-btn')
   );
   const useRegexpCheckbox = /** @type {HTMLInputElement} */ (
-    document.querySelector("#use-regexp")
+    document.querySelector('#use-regexp')
   );
   const useRegexpBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector("#use-regexp-btn")
+    document.querySelector('#use-regexp-btn')
   );
   const searchBox = /** @type {HTMLInputElement} */ (
-    document.querySelector("#search-box")
+    document.querySelector('#search-box')
   );
   const searchBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector("#search-btn")
+    document.querySelector('#search-btn')
   );
   const resetBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector("#reset-btn")
+    document.querySelector('#reset-btn')
   );
   const downloadBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector("#download-btn")
+    document.querySelector('#download-btn')
   );
   const copyBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector("#copy-btn")
+    document.querySelector('#copy-btn')
   );
   const txtArea = /** @type {HTMLTextAreaElement} */ (
-    document.querySelector("#txt-box")
+    document.querySelector('#txt-box')
   );
   const tabContainer = /** @type {HTMLDivElement} */ (
-    document.querySelector(".tab-container")
-  )
+    document.querySelector('.tab-container')
+  );
   const fileInput = /** @type {HTMLInputElement} */ (
-    document.querySelector("#file-input")
-  )
+    document.querySelector('#file-input')
+  );
   const fileBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector("#file-btn")
+    document.querySelector('#file-btn')
   );
   const openLinksArea = /** @type {HTMLTextAreaElement} */ (
-    document.querySelector("#links-to-open")
-  )
+    document.querySelector('#links-to-open')
+  );
   const openBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector("#open-btn")
+    document.querySelector('#open-btn')
   );
   const delayInput = /** @type {HTMLInputElement} */ (
-    document.querySelector("#delay-input")
+    document.querySelector('#delay-input')
   );
   const mainContainer = /** @type {HTMLDivElement} */ (
-    document.querySelector("#main")
+    document.querySelector('#main')
   );
   const copyPage = /** @type {HTMLDivElement} */ (
-    document.querySelector(".page.copy-page")
+    document.querySelector('.page.copy-page')
   );
   const openPage = /** @type {HTMLDivElement} */ (
-    document.querySelector(".page.open-page")
+    document.querySelector('.page.open-page')
   );
   const copyTabBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector(".tab.copy-page")
+    document.querySelector('.tab.copy-page')
   );
   const openTabBtn = /** @type {HTMLButtonElement} */ (
-    document.querySelector(".tab.open-page")
+    document.querySelector('.tab.open-page')
   );
-  const TAG = "[Tabs2Links]";
-  const defaultIcon = "../img/question.png";
-  const t2lIcon = "../icons/icon128.png";
+  const TAG = '[Tabs2Links]';
+  const defaultIcon = '../img/question.png';
+  const t2lIcon = '../icons/icon128.png';
   const DEBOUNCE_SEARCH_MS = 300;
   const UNSET_TIMER_REF = -1;
   const DEFAULT_DELAY = 1;
   // Constants
-  const BLUR = "blur";
-  const FOCUS = "focus";
-  const CLICK = "click";
-  const CHANGE = "change";
-  const MOUSEOVER = "mouseover";
-  const MOUSEOUT = "mouseout";
-  const LOAD = "load";
-  const ERROR = "error";
-  const WARN = "warn";
-  const INFO = "info";
-  const LOG = "log";
-  const DEBUG = "debug";
-  const HIDE = "hide";
-  const REMOVE = "remove";
-  const ADD = "add";
-  const KEYUP = "keyup";
-  const KEYDOWN = "keydown";
-  const SPAN = "span";
-  const BUTTON = "button";
-  const DIV = "div";
-  const LI = "li";
-  const UL = "ul";
-  const A = "a";
-  const STYLE = "style";
-  const CHROME = "chrome";
-  const FIREFOX = "firefox";
-  const EMPTY = "";
-  const EDITABLE = "contenteditable";
-  const DOWNLOAD_MIME = "data:text/plain;charset=utf-8,";
+  const BLUR = 'blur';
+  const FOCUS = 'focus';
+  const CLICK = 'click';
+  const CHANGE = 'change';
+  const MOUSEOVER = 'mouseover';
+  const MOUSEOUT = 'mouseout';
+  const LOAD = 'load';
+  const ERROR = 'error';
+  const WARN = 'warn';
+  const INFO = 'info';
+  const LOG = 'log';
+  const DEBUG = 'debug';
+  const HIDE = 'hide';
+  const REMOVE = 'remove';
+  const ADD = 'add';
+  const KEYUP = 'keyup';
+  const KEYDOWN = 'keydown';
+  const SPAN = 'span';
+  const BUTTON = 'button';
+  const DIV = 'div';
+  const LI = 'li';
+  const UL = 'ul';
+  const A = 'a';
+  const STYLE = 'style';
+  const CHROME = 'chrome';
+  const FIREFOX = 'firefox';
+  const EMPTY = '';
+  const EDITABLE = 'contenteditable';
+  const DOWNLOAD_MIME = 'data:text/plain;charset=utf-8,';
   const OPEN_LINKS = 'open_links';
-  const POPOVERTARGET = "popovertarget"
+  const POPOVERTARGET = 'popovertarget';
   // Keyboard navigation
-  const TAB_KEY = "Tab";
-  const ENTER = "Enter";
-  const ESCAPE = "Escape";
-  const ARROW_UP = "ArrowUp";
-  const ARROW_DOWN = "ArrowDown";
-  const ARROW_LEFT = "ArrowLeft";
-  const ARROW_RIGHT = "ArrowRight";
-  const HOME = "Home";
-  const END = "End";
+  const TAB_KEY = 'Tab';
+  const ENTER = 'Enter';
+  const ESCAPE = 'Escape';
+  const ARROW_UP = 'ArrowUp';
+  const ARROW_DOWN = 'ArrowDown';
+  const ARROW_LEFT = 'ArrowLeft';
+  const ARROW_RIGHT = 'ArrowRight';
+  const HOME = 'Home';
+  const END = 'End';
   // Shortcut keys (compared lower-cased, combined with Ctrl)
-  const KEY_FOCUS_SEARCH = "f";
-  const KEY_COPY_ALL = "c";
+  const KEY_FOCUS_SEARCH = 'f';
+  const KEY_COPY_ALL = 'c';
   // contenteditable attribute values
-  const EDITABLE_ON = "true";
-  const EDITABLE_OFF = "false";
+  const EDITABLE_ON = 'true';
+  const EDITABLE_OFF = 'false';
   // Row navigable segments (columns)
-  const SEGMENT_FULL = "full";
-  const SEGMENT_COPY = "copy";
-  const SEGMENT_DELETE = "delete";
+  const SEGMENT_FULL = 'full';
+  const SEGMENT_COPY = 'copy';
+  const SEGMENT_DELETE = 'delete';
   // Navigation directions (offsets in the tab-stop ring)
   const FORWARD = 1;
   const BACKWARD = -1;
   // CSS Selectors
-  const ALL_ROWS = ".row-link";
-  const VISIBLE_ROWS = ".row-link:not(.hide)";
-  const VISIBLE_LINKS = ".row-link:not(.hide) span";
-  const COPY_BUTTON = ".button-wrapper:first-child";
-  const REMOVE_BUTTON = ".button-wrapper:last-child";
+  const ALL_ROWS = '.row-link';
+  const VISIBLE_ROWS = '.row-link:not(.hide)';
+  const VISIBLE_LINKS = '.row-link:not(.hide) span';
+  const COPY_BUTTON = '.button-wrapper:first-child';
+  const REMOVE_BUTTON = '.button-wrapper:last-child';
   const ELEMENTS_WITH_POPOVERS = "[popovertarget][data-trigger='hover']";
   // CSS Classes
-  const ROW_LINK = "row-link";
-  const TAB_ICON = "tab-icon";
-  const CLOSE_BUTTON = "close-button";
-  const CLOSE_BUTTON_CONTAINER = "close-button-container";
-  const BUTTON_WRAPPER = "button-wrapper";
-  const ACTIVE_TAB = "active";
-  const OPEN_PAGE = "open-page";
-  const COPY_PAGE = "copy-page";
+  const ROW_LINK = 'row-link';
+  const TAB_ICON = 'tab-icon';
+  const CLOSE_BUTTON = 'close-button';
+  const CLOSE_BUTTON_CONTAINER = 'close-button-container';
+  const BUTTON_WRAPPER = 'button-wrapper';
+  const ACTIVE_TAB = 'active';
+  const OPEN_PAGE = 'open-page';
+  const COPY_PAGE = 'copy-page';
   // Array Methods
-  const EVERY = "every";
-  const SOME = "some";
+  const EVERY = 'every';
+  const SOME = 'some';
   // Placeholder content
-  const SEARCH_BY_REGEXP = "Search using regex";
-  const SEARCH_BY_TEXT = "Search text";
-  const NOTIFICATION_ID = "tabs-to-links_global_notificationId";
-  const OK = "OK";
-  const NOTIFICATION_TITLE = "Copied to clipboard";
-  const BEFORE_UNLOAD = "beforeunload";
-  const TYPE_BASIC = "basic";
-  const LINKS_AREA_MESSAGE = "// Add your links here\n// lines starting with '//', '#', and ';'\n// will be ignored\n";
+  const SEARCH_BY_REGEXP = 'Search using regex';
+  const SEARCH_BY_TEXT = 'Search text';
+  const NOTIFICATION_ID = 'tabs-to-links_global_notificationId';
+  const OK = 'OK';
+  const NOTIFICATION_TITLE = 'Copied to clipboard';
+  const BEFORE_UNLOAD = 'beforeunload';
+  const TYPE_BASIC = 'basic';
+  const LINKS_AREA_MESSAGE =
+    "// Add your links here\n// lines starting with '//', '#', and ';'\n// will be ignored\n";
 
   /**
    * @template T
@@ -186,7 +187,12 @@
    * @param {(ret: ReturnType<T>) => void} [notify] Notify function with returned value of func
    * @returns {(...any: Parameters<T>) => void} Function with same signature but void return that is debounced
    */
-  const debounceFunction = (func, ref, time = DEBOUNCE_SEARCH_MS, notify = () => {}) => {
+  const debounceFunction = (
+    func,
+    ref,
+    time = DEBOUNCE_SEARCH_MS,
+    notify = () => { },
+  ) => {
     return (...args) => {
       if (ref.current !== UNSET_TIMER_REF) {
         clearTimeout(ref.current);
@@ -204,13 +210,16 @@
   };
 
   /**
-   * Send a message to a service worker. This should be used for
-   * chromium based browsers only due to MV3
+   * Send a message to the background script. Works on both Chrome (MV3 service
+   * worker) and Firefox (MV2 persistent background page) because both receive
+   * it through a runtime.onMessage listener. Delegating the work to the
+   * background keeps it running after the popup closes (opening links steals
+   * focus and dismisses the popup).
    *
    * @template T=any
    * @template R=any
-   * @param {Message<T>} message Message to send to chrome service worker
-   * @returns {Promise<BackgroundResponse<R> | Error>} Message response from service worker
+   * @param {Message<T>} message Message to send to the background script
+   * @returns {Promise<BackgroundResponse<R> | Error>} Message response from the background script
    */
   const sendMessageWorker = async (message) => {
     try {
@@ -221,25 +230,6 @@
       return error instanceof Error ? error : new Error(`${error}`);
     }
   };
-
-  /**
-   * Send a message to a service worker. This should be used for
-   * chromium based browsers only due to MV3
-   *
-   * @template T=any
-   * @template R=any
-   * @param {Message<T>} message Message to send to chrome service worker
-   * @returns {Promise<BackgroundResponse<R> | Error>} Message response from service worker
-   */
-  const sendMessageBackground = async (message) => {
-    const backgroundPage = chrome.extension.getBackgroundPage();
-    if (!backgroundPage) {
-      return Promise.reject(new Error('No background script found'));
-    }
-
-    const response = backgroundPage.sendBackgroundMessage(message);
-    return response instanceof Promise ? response : Promise.resolve(response);
-  }
 
   // Storage keys
   /**
@@ -252,19 +242,19 @@
 
   /** @type {STORAGE} */
   const STORAGE = {
-    CONFIG: "config",
+    CONFIG: 'config',
   };
   // Browser Specific
   const BROWSER_CSS_VARIABLES = {
     [CHROME]: [
-      "--txt-box-width: 400px",
-      "--list-right-padding: 0",
-      "--delay-tooltip-margin: 5px",
+      '--txt-box-width: 400px',
+      '--list-right-padding: 0',
+      '--delay-tooltip-margin: 5px',
     ],
     [FIREFOX]: [
-      "--txt-box-width: 340px",
-      "--list-right-padding: 10px",
-      "--delay-tooltip-margin: var(--row-height)",
+      '--txt-box-width: 340px',
+      '--list-right-padding: 10px',
+      '--delay-tooltip-margin: var(--row-height)',
     ],
   };
 
@@ -290,8 +280,8 @@
      * @type {(previousValue: Logger, currentValue: LogLevels, currentIndex: number, array: string[]) => Logger}
      */
     const reduceFunction = (
-			/** @type {Logger} */ logger,
-			/** @type {LogLevels} */ level,
+      /** @type {Logger} */ logger,
+      /** @type {LogLevels} */ level,
     ) => {
       /** @type {LogFunction} */
       const logFunction = (message, ...rest) => {
@@ -303,7 +293,7 @@
     };
 
     const levels =
-			/** @type {{ reduce: (callback: typeof reduceFunction, initial: object) => Logger }} */ ([
+      /** @type {{ reduce: (callback: typeof reduceFunction, initial: object) => Logger }} */ ([
         ERROR,
         WARN,
         INFO,
@@ -327,6 +317,21 @@
     return FIREFOX;
   })();
 
+  // Firefox destroys the browserAction popup document as soon as the native
+  // file picker steals focus (https://bugzilla.mozilla.org/show_bug.cgi?id=1433604),
+  // so the 'change' event on #file-input never reaches it. Working around this
+  // means picking the file from a regular extension window instead, since
+  // Firefox only auto-dismisses the special popup panel, not ordinary windows.
+  const STANDALONE_PARAM = 'standalone';
+  const FILE_PICKER_DRAFT_KEY = 'file_picker_draft';
+  const CREATION_RATIO = 'devicePixelRatio';
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isStandaloneWindow = urlParams.has(
+    STANDALONE_PARAM,
+  );
+  const creationRatio = parseFloat(urlParams.get(CREATION_RATIO) ?? '1');
+
   /**
    * Add styles to the document by appending a style tag.
    * @param {string} style Styles to append to the document
@@ -345,7 +350,7 @@
   const setBrowserSpecificStyles = () => {
     // Append specific variables sets to the :root
     const browserVars = BROWSER_CSS_VARIABLES[BROWSER];
-    const stylesString = browserVars.join(";");
+    const stylesString = browserVars.join(';');
     const styles = `:root {${stylesString}}`;
     addCssStyle(styles);
 
@@ -366,10 +371,10 @@
    * @returns {void}
    */
   const filterItemsSimple = (query) => {
-    const isNegative = query.startsWith("^");
+    const isNegative = query.startsWith('^');
     const cleanQuery = isNegative ? query.substring(1) : query;
-    const isAnd = cleanQuery.includes("&");
-    const isOr = cleanQuery.includes("|");
+    const isAnd = cleanQuery.includes('&');
+    const isOr = cleanQuery.includes('|');
     // const isPlain = !isAnd && !isOr;
 
     if (isAnd && isOr) {
@@ -383,20 +388,19 @@
     let /** @type {string[]} */ terms;
 
     if (isAnd) {
-      terms = cleanQuery.split("&");
+      terms = cleanQuery.split('&');
       arrayMethod = EVERY;
     } else {
-      terms = cleanQuery.split("|");
+      terms = cleanQuery.split('|');
       arrayMethod = SOME;
     }
 
     // Trim the terms, so whitespaces can be added between separators
     terms = terms.map((term) => term.trim());
 
-    // biome-ignore lint/complexity/noForEach: prefer forEach for readability
     document.querySelectorAll(ALL_ROWS).forEach((item) => {
       try {
-        const text = item.querySelector(SPAN)?.textContent || "";
+        const text = item.querySelector(SPAN)?.textContent || '';
         const shouldHide =
           terms[arrayMethod]((term) => text.includes(term)) === isNegative;
         // NOTE: Method adds or removes the 'hide' class
@@ -405,7 +409,7 @@
         item.classList[classMethod](HIDE);
       } catch (e) {
         // Should not arrive here
-        error("[FilterSimple] Error evaluating text:", e);
+        error('[FilterSimple] Error evaluating text:', e);
       }
     });
   };
@@ -433,21 +437,20 @@
       // > pattern cannot be parsed as a valid regular expression.
       // > flags contains repeated characters or any character outside of those allowed.
       // Src: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/RegExp
-      debug("[FilterRegexp] Error creating regexp:", e);
+      debug('[FilterRegexp] Error creating regexp:', e);
       isValid = (text) => text.includes(query);
     }
 
-    // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
     document.querySelectorAll(ALL_ROWS).forEach((item) => {
       try {
-        const text = item.querySelector(SPAN)?.textContent || "";
+        const text = item.querySelector(SPAN)?.textContent || '';
         // NOTE: Method adds or removes the 'hide' class
         // so initial remove means all are visible by default
         const classMethod = isValid(text) ? REMOVE : ADD;
         item.classList[classMethod](HIDE);
       } catch (e) {
         // Should not arrive here
-        error("[FilterRegexp] Error evaluating text:", e);
+        error('[FilterRegexp] Error evaluating text:', e);
       }
     });
   };
@@ -458,7 +461,6 @@
    * @returns {void}
    */
   const setAllVisible = () => {
-    // biome-ignore lint/complexity/noForEach: Prefer forEach for readability
     document
       .querySelectorAll(ALL_ROWS)
       .forEach((i) => void i.classList.remove(HIDE));
@@ -510,13 +512,15 @@
     chrome.notifications.onClicked.addListener(onClickedCallback);
 
     window.addEventListener(BEFORE_UNLOAD, () => {
-      chrome.notifications.onButtonClicked.removeListener(onButtonClickedCallback);
+      chrome.notifications.onButtonClicked.removeListener(
+        onButtonClickedCallback,
+      );
       chrome.notifications.onClicked.removeListener(onClickedCallback);
-    })
-  }
+    });
+  };
 
   const firefoxNotificationRequest = () => {
-    if (BROWSER !== FIREFOX || Notification.permission !== "default") {
+    if (BROWSER !== FIREFOX || Notification.permission !== 'default') {
       return;
     }
 
@@ -524,12 +528,14 @@
     // Ask to allow user to deny but the extension will take "default" as "granted".
     // As it is not possible to check the regular permissions (see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/notifications)
     // We attempt to ask using the web notification API instead.
-    Notification.requestPermission().then(_permission => {
-      // Do nothing
-    }).catch((e) => {
-      console.error("Cannot request for notifications", e)
-    });
-  }
+    Notification.requestPermission()
+      .then((_permission) => {
+        // Do nothing
+      })
+      .catch((e) => {
+        console.error('Cannot request for notifications', e);
+      });
+  };
 
   /**
    * Sets the given text in the device clipboard
@@ -548,12 +554,10 @@
 
       const notify_host = () => {
         const message = all
-          ? "All links have been copied to clipboard!"
+          ? 'All links have been copied to clipboard!'
           : `Link copied: ${string}`;
 
-        extension_notify(NOTIFICATION_ID, message, [
-          { title: OK  },
-        ]);
+        extension_notify(NOTIFICATION_ID, message, [{ title: OK }]);
       };
 
       switch (BROWSER) {
@@ -561,29 +565,30 @@
           // NOTE: Firefox does not implement 'getPermissionLevel'.
           // Only skip notifications if explicitly denied.
           switch (Notification.permission) {
-            case "denied":
+            case 'denied':
               return;
 
-            case "default":
-            case "granted":
+            case 'default':
+            case 'granted':
               notify_host();
               break;
           }
           break;
 
         default:
-          // @ts-expect-error Only possible values override to allow nicer completion
           // Ref: https://developer.chrome.com/docs/extensions/reference/api/notifications#type-PermissionLevel
-          chrome.notifications.getPermissionLevel((/** @type {"granted"|"denied"} */level) => {
-            if (level === 'granted') {
-              notify_host();
-            }
-          });
+          chrome.notifications.getPermissionLevel(
+            // @ts-expect-error Only possible values override to allow nicer completion
+            (/** @type {"granted"|"denied"} */ level) => {
+              if (level === 'granted') {
+                notify_host();
+              }
+            },
+          );
           break;
       }
-
     } catch (error) {
-      warn("Unable to copy text in clipboard.");
+      warn('Unable to copy text in clipboard.');
     }
   };
 
@@ -709,14 +714,14 @@
    * @param {MouseEvent} evt
    */
   const onTextClick = (evt) => {
-		/** @type {HTMLSpanElement} */ (evt.target).contentEditable = "true";
+    /** @type {HTMLSpanElement} */ (evt.target).contentEditable = 'true';
   };
 
   /**
    * @param {FocusEvent} evt
    */
   const onTextBlur = (evt) => {
-		/** @type {HTMLSpanElement} */ (evt.target).contentEditable = "false";
+    /** @type {HTMLSpanElement} */ (evt.target).contentEditable = 'false';
   };
 
   /**
@@ -796,9 +801,9 @@
    * @returns {HTMLLIElement[]}
    */
   const getVisibleRows = () =>
-    /** @type {HTMLLIElement[]} */ (
-      Array.from(txtArea.querySelectorAll(VISIBLE_ROWS))
-    );
+    /** @type {HTMLLIElement[]} */(
+    Array.from(txtArea.querySelectorAll(VISIBLE_ROWS))
+  );
 
   /**
    * Resolve the row and segment (column) of a focused element inside #txt-box.
@@ -838,7 +843,8 @@
 
     let target = /** @type {HTMLElement} */ (row);
     if (segment === SEGMENT_COPY) {
-      target = /** @type {HTMLElement} */ (row.querySelector(COPY_BUTTON)) || row;
+      target =
+        /** @type {HTMLElement} */ (row.querySelector(COPY_BUTTON)) || row;
     } else if (segment === SEGMENT_DELETE) {
       target =
         /** @type {HTMLElement} */ (row.querySelector(REMOVE_BUTTON)) || row;
@@ -853,7 +859,9 @@
    * @returns {void}
    */
   const enterEditMode = (row) => {
-    const span = /** @type {HTMLSpanElement | null} */ (row.querySelector(SPAN));
+    const span = /** @type {HTMLSpanElement | null} */ (
+      row.querySelector(SPAN)
+    );
     if (!span) {
       return;
     }
@@ -923,7 +931,7 @@
     if (active?.isContentEditable) {
       if (evt.key === ESCAPE) {
         evt.preventDefault();
-        exitEditMode(/** @type {HTMLSpanElement} */ (active));
+        exitEditMode(/** @type {HTMLSpanElement} */(active));
       }
       return;
     }
@@ -1115,8 +1123,14 @@
     }
   };
 
-  const onCopyPageTabKeydown = createTabLoopHandler(copyPage, getCopyPageTabStops);
-  const onOpenPageTabKeydown = createTabLoopHandler(openPage, getOpenPageTabStops);
+  const onCopyPageTabKeydown = createTabLoopHandler(
+    copyPage,
+    getCopyPageTabStops,
+  );
+  const onOpenPageTabKeydown = createTabLoopHandler(
+    openPage,
+    getOpenPageTabStops,
+  );
 
   /**
    * Ctrl-based shortcuts for the copy page.
@@ -1141,7 +1155,10 @@
 
       case KEY_COPY_ALL:
         // Preserve native paste while typing in search or editing a row.
-        if (active === searchBox || !!(/** @type {HTMLElement|null} */ (active)?.isContentEditable)) {
+        if (
+          active === searchBox ||
+          !!(/** @type {HTMLElement|null} */ (active)?.isContentEditable)
+        ) {
           return;
         }
         evt.preventDefault();
@@ -1211,13 +1228,48 @@
         });
       })
       .catch((e) => {
-        error("[Storage] Error updating storage:", e);
+        error('[Storage] Error updating storage:', e);
         promise.reject(
-          new Error("[Storage] Error updating storage", { cause: e }),
+          new Error('[Storage] Error updating storage', { cause: e }),
         );
       });
 
     return promise.promise;
+  };
+
+  /**
+   * @typedef {{ links: string; delay: number; }} FilePickerDraft
+   */
+
+  /**
+   * Stash the in-progress "open links" state in local (non-synced) storage so
+   * it can be restored by the standalone window opened for the Firefox file
+   * picker workaround.
+   * @param {FilePickerDraft} draft
+   * @returns {Promise<void>}
+   */
+  const saveFilePickerDraft = (draft) => {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ [FILE_PICKER_DRAFT_KEY]: draft }, () =>
+        resolve(),
+      );
+    });
+  };
+
+  /**
+   * Read and clear the stashed "open links" state left by the popup before it
+   * opened the standalone file-picker window.
+   * @returns {Promise<FilePickerDraft | null>}
+   */
+  const takeFilePickerDraft = () => {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(FILE_PICKER_DRAFT_KEY, (stored) => {
+        const draft = stored[FILE_PICKER_DRAFT_KEY] || null;
+        chrome.storage.local.remove(FILE_PICKER_DRAFT_KEY, () =>
+          resolve(draft),
+        );
+      });
+    });
   };
 
   /**
@@ -1327,7 +1379,7 @@
      */
     const forEachTab = (tab) => {
       const { url, favIconUrl } = tab;
-      const item = formatLink(url || "", favIconUrl || "");
+      const item = formatLink(url || '', favIconUrl || '');
       list.appendChild(item);
     };
 
@@ -1357,7 +1409,7 @@
     }
 
     const link = document.createElement(A);
-    const date = new Date().toISOString().replace(/:/gi, "-");
+    const date = new Date().toISOString().replace(/:/gi, '-');
 
     link.download = `links_${date}.txt`;
     link.href = `${DOWNLOAD_MIME}${encodeURIComponent(text)}`;
@@ -1376,7 +1428,7 @@
     const useRegexp = !useRegexpCheckbox.checked;
 
     setStorage(STORAGE.CONFIG, { useRegexp }).catch((e) => {
-      error("[Storage] Error updating config.useRegexp to:", useRegexp, e);
+      error('[Storage] Error updating config.useRegexp to:', useRegexp, e);
     });
 
     useRegexpCheckbox.checked = useRegexp;
@@ -1390,7 +1442,7 @@
     const allWindows = !allWindowsCheckbox.checked;
 
     setStorage(STORAGE.CONFIG, { allWindows }).catch((e) => {
-      error("[Storage] Error updating config.allWindows to:", allWindows, e);
+      error('[Storage] Error updating config.allWindows to:', allWindows, e);
     });
 
     allWindowsCheckbox.checked = allWindows;
@@ -1401,13 +1453,10 @@
 
   /**
    * Enable content editable in cell
-	 * @param {MutationRecord[]} _mutationList List to observe
-	 * @param {MutationObserver} _observer Observer
+   * @param {MutationRecord[]} _mutationList List to observe
+   * @param {MutationObserver} _observer Observer
    */
-  const enableContentEditable = (
-		_mutationList,
-		_observer,
-  ) => {
+  const enableContentEditable = (_mutationList, _observer) => {
     // Enable if there are items left and they are visible
     const enableEdit = !!document.querySelectorAll(VISIBLE_ROWS).length;
 
@@ -1470,7 +1519,10 @@
     });
   };
 
-  const debouncedSaveDelayTime = debounceFunction(saveDelayTime, saveDelayTimerRef);
+  const debouncedSaveDelayTime = debounceFunction(
+    saveDelayTime,
+    saveDelayTimerRef,
+  );
 
   const setObserverTxtArea = () => {
     const config = { childList: true, subtree: true };
@@ -1478,6 +1530,78 @@
     const observer = new MutationObserver(enableContentEditable);
 
     observer.observe(txtArea, config);
+  };
+
+  /**
+   * The extension's fixed content size, read directly from the
+   * --app-width/--app-height custom properties (see :root in styles.css,
+   * built from the tabs row, search row, links list and button row).
+   * --app-height is registered via @property with a <length> syntax so its
+   * calc() resolves to a real value here instead of being returned as an
+   * unevaluated "calc(...)" string. Reading these — rather than measuring
+   * the rendered DOM — is deterministic regardless of whether the subtree
+   * has finished laying out or painting yet, since it resolves purely from
+   * fixed top-level constants.
+   *
+   * Resolved sizes apply a `devicePixelRatio` adjustment (window.devicePixelRatio from popup)
+   * needed to properly resize the resulting standalone window.
+   *
+   * @returns {{ width: number; height: number; }}
+   */
+  const getAppContentSize = () => {
+    const rootStyles = getComputedStyle(document.documentElement);
+    const correctionRatio = isStandaloneWindow ? creationRatio : window.devicePixelRatio
+
+    return {
+      width: Math.round(
+        Number.parseFloat(rootStyles.getPropertyValue('--app-width')) *
+        correctionRatio,
+      ),
+      height: Math.round(
+        Number.parseFloat(rootStyles.getPropertyValue('--app-height')) *
+        correctionRatio,
+      ),
+    };
+  };
+
+  /**
+   * Resize the standalone window (opened for the Firefox file-picker
+   * workaround, see isStandaloneWindow above) so its outer size matches the
+   * extension's fixed content size directly (no frame/chrome compensation —
+   * matching that is what actually fits the UI).
+   * @returns {void}
+   */
+  const fitStandaloneWindowToContent = () => {
+    if (!isStandaloneWindow) {
+      return;
+    }
+
+    chrome.windows.getCurrent(async (win) => {
+      if (win.id === undefined) {
+        return;
+      }
+
+      const { width: _width, height } = getAppContentSize();
+      // Debug log
+      // console.log(
+      //   `chrome.windows.update(${win.id}, { width: ${width}, height: ${height} })`,
+      // );
+      await chrome.windows.update(win.id, {
+        // Need to adjust height only to include the window navigation bar
+        height: height + (window.outerHeight - window.innerHeight),
+      });
+      // Debug log
+      // console.log('Sizes (after update):', {
+      //   width: _width,
+      //   height,
+      //   outerWidth,
+      //   outerHeight,
+      //   innerWidth,
+      //   innerHeight,
+      //   devicePixelRatio,
+      //   creationRatio,
+      // });
+    });
   };
 
   /**
@@ -1490,10 +1614,14 @@
     }
 
     const isOpenTab = tab.classList.contains(OPEN_PAGE);
-    const [showClass, hideClass] = isOpenTab ? [OPEN_PAGE, COPY_PAGE] : [COPY_PAGE, OPEN_PAGE];
+    const [showClass, hideClass] = isOpenTab
+      ? [OPEN_PAGE, COPY_PAGE]
+      : [COPY_PAGE, OPEN_PAGE];
 
     // Set tab active
-    tabContainer.querySelector(`.tab.${hideClass}`)?.classList.remove(ACTIVE_TAB);
+    tabContainer
+      .querySelector(`.tab.${hideClass}`)
+      ?.classList.remove(ACTIVE_TAB);
     tabContainer.querySelector(`.tab.${showClass}`)?.classList.add(ACTIVE_TAB);
 
     // Set display tab
@@ -1527,7 +1655,42 @@
     openLinksArea.value = currText;
   };
 
+  /**
+   * Open a standalone extension window carrying over the current draft, so
+   * the native file picker can be used without losing the popup's contents
+   * (see the isStandaloneWindow comment above for why this is needed).
+   * @returns {Promise<void>}
+   */
+  const openStandaloneFilePicker = async () => {
+    await saveFilePickerDraft({
+      links: openLinksArea.value,
+      delay: getDelayValue(),
+    });
+
+    const { width, height } = getAppContentSize();
+
+    const url = chrome.runtime.getURL(
+      `action/index.html?${STANDALONE_PARAM}=1&${CREATION_RATIO}=${window.devicePixelRatio}`,
+    );
+    chrome.windows.create({
+      url,
+      type: 'popup',
+      width,
+      height,
+    });
+    // Debug log
+    // console.log(
+    //   `chrome.windows.create({ url: ${url}, type: 'popup', width: ${width}, height: ${height} })`,
+    // );
+    window.close();
+  };
+
   const onOpenFilesClick = () => {
+    if (BROWSER === FIREFOX && !isStandaloneWindow) {
+      openStandaloneFilePicker();
+      return;
+    }
+
     fileInput.click();
   };
 
@@ -1536,7 +1699,7 @@
    * Calling this function will close the popup action page
    * and end this scripts execution
    */
-  const onOpenLinks = () => {
+  const onOpenLinks = async () => {
     /**
      * @type {OpenLinksMessage}
      */
@@ -1545,21 +1708,18 @@
       payload: {
         links: openLinksArea.value,
         delay: getDelayValue(),
-      }
+      },
     };
 
-    switch (BROWSER) {
-      case CHROME: {
-        sendMessageWorker(message);
-        break;
-      }
-      case FIREFOX: {
-        sendMessageBackground(message);
-        break;
-      }
-      default:
-        error('Unknown browser');
-        break;
+    // Both Chrome and Firefox handle this through a runtime.onMessage listener
+    // in their background script, so the loop survives the popup closing.
+    await sendMessageWorker(message);
+
+    // The standalone window (see openStandaloneFilePicker) is a regular
+    // window, so unlike the popup it will not auto-close once links start
+    // opening and steal focus. Close it explicitly instead.
+    if (isStandaloneWindow) {
+      window.close();
     }
   };
 
@@ -1568,7 +1728,11 @@
    */
   const initialTabsSetup = () => {
     // Mark first tab as current
-    const tabs = Array.from(/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tab')));
+    const tabs = Array.from(
+      /** @type {NodeListOf<HTMLElement>} */(
+        document.querySelectorAll('.tab')
+      ),
+    );
     for (let i = 0; i < tabs.length; ++i) {
       const tab = tabs[i];
       tab.addEventListener(CLICK, onTabClick);
@@ -1582,25 +1746,31 @@
    * focus (focus/blur), so the hint is reachable without a pointer.
    */
   const startTooltips = () => {
-    const elements = Array.from(/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(ELEMENTS_WITH_POPOVERS)));
+    const elements = Array.from(
+      /** @type {NodeListOf<HTMLElement>} */(
+        document.querySelectorAll(ELEMENTS_WITH_POPOVERS)
+      ),
+    );
 
     /** @param {HTMLElement} target */
     const showTooltip = (target) => {
       // Guard against double-showing when hover and focus overlap.
-      if (!target.matches(":popover-open")) {
+      if (!target.matches(':popover-open')) {
         target.showPopover();
       }
     };
 
     /** @param {HTMLElement} target */
     const hideTooltip = (target) => {
-      if (target.matches(":popover-open")) {
+      if (target.matches(':popover-open')) {
         target.hidePopover();
       }
     };
 
     for (const element of elements) {
-      const target = /** @type {HTMLElement} */ (document.querySelector(`#${element.getAttribute(POPOVERTARGET)}`));
+      const target = /** @type {HTMLElement} */ (
+        document.querySelector(`#${element.getAttribute(POPOVERTARGET)}`)
+      );
 
       if (!target) {
         continue;
@@ -1617,7 +1787,7 @@
    * Startup popup logic
    */
   const onWindowsLoad = async () => {
-    // const {} = await 
+    // const {} = await
     getStorage(STORAGE.CONFIG).then(({ allWindows, useRegexp, openDelay }) => {
       allWindowsCheckbox.checked = !!allWindows;
       useRegexpCheckbox.checked = !!useRegexp;
@@ -1630,6 +1800,19 @@
     updateSearchPlaceholder();
     searchBox.focus();
     initialTabsSetup();
+
+    if (isStandaloneWindow) {
+      fitStandaloneWindowToContent();
+
+      const draft = await takeFilePickerDraft();
+      if (draft) {
+        openLinksArea.value = draft.links;
+        // @ts-expect-error Set current value even if number
+        delayInput.value = draft.delay;
+        openTabBtn.click();
+        fileBtn.focus();
+      }
+    }
     // setObserverTxtArea();
   };
 
@@ -1643,7 +1826,7 @@
     copyBtn.addEventListener(CLICK, copyHandler);
     openBtn.addEventListener(CLICK, onOpenLinks);
     fileInput.addEventListener(CHANGE, onSelectedFiles);
-    fileBtn .addEventListener(CLICK, onOpenFilesClick);
+    fileBtn.addEventListener(CLICK, onOpenFilesClick);
     delayInput.addEventListener(CHANGE, debouncedSaveDelayTime);
     delayInput.addEventListener(KEYDOWN, debouncedSaveDelayTime);
     txtArea.addEventListener(KEYDOWN, onTxtBoxKeydown);

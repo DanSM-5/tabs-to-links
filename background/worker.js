@@ -30,7 +30,6 @@ const openLinks = async (text, delay) => {
       continue;
     }
 
-    // Does not work
     await chrome.tabs.create({ url: link  });
     await sleep(delay);
   }
@@ -53,14 +52,20 @@ const getFailureResponse = (reason) => {
 
 chrome.runtime.onMessage.addListener(
   /**
+   * The listener is intentionally not `async`: returning a promise tells the
+   * messaging layer to keep the channel open for an async response, which
+   * races with the synchronous sendResponse below. We respond right away and
+   * then run the loop detached so it survives the popup closing.
    * @param {Message|undefined} request
+   * @param {chrome.runtime.MessageSender} _sender
    * @param {(response: BackgroundResponse) => void} sendResponse
    */
-  async (request, _sender, sendResponse) => {
+  (request, _sender, sendResponse) => {
     if (!request) {
       const reason = "No request in message";
       console.warn(reason);
-      return sendResponse(getFailureResponse(reason));
+      sendResponse(getFailureResponse(reason));
+      return;
     }
 
     const { type } =  request;
@@ -75,13 +80,14 @@ chrome.runtime.onMessage.addListener(
         }
 
         sendResponse(response);
-        await openLinks(links, delay);
+        openLinks(links, delay);
         return;
       }
       default: {
         const reason = `No handler for type: ${type}`;
         console.warn(reason);
-        return sendResponse(getFailureResponse(reason));
+        sendResponse(getFailureResponse(reason));
+        return;
       }
     }
   }

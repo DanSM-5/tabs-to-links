@@ -1,3 +1,14 @@
+/* Registered so its calc() resolves to a real length when read back via
+   getComputedStyle(document.documentElement).getPropertyValue('--app-height')
+   in script.js. Unregistered custom properties return calc() expressions
+   as an unevaluated string (see https://github.com/w3c/csswg-drafts/issues/2358),
+   which parseFloat() can't use. */
+@property --app-height {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 :root {
   /* DARK THEME */
   --dark-theme: hsl(225, 6%, 13%);
@@ -35,13 +46,29 @@
   --ui-left-separation: 3px;
   --row-height: 45px;
   --link-area-height: 335px;
-  --link-text-area-height: 300px;
+  /* Match the copy page's search row + links list, so both tabs share the
+     same total content height (see --app-height below). */
+  --link-text-area-height: calc(var(--row-height) + var(--link-area-height));
   --btn-font-size: 0.9rem;
+  --button-area-height: 30px;
+  --button-area-margin: 10px;
+
+  /* App frame size, built from its fixed-height sections: the tabs row,
+     the search row, the links list, and the button row (with its margin).
+     Kept as a single source of truth so script.js can read it back via
+     getComputedStyle() to size the standalone window used for the Firefox
+     file-picker workaround (see action/script.js). */
+  --app-width: 500px;
+  --app-height: calc(
+    var(--row-height) + var(--row-height) + var(--link-area-height) +
+      var(--button-area-height) + (var(--button-area-margin) * 2)
+  );
 }
 
 body {
   margin: 0;
   color: var(--theme-text);
+  background-color: var(--theme);
 }
 
 #main {
@@ -50,7 +77,8 @@ body {
   flex-direction: column;
   font-size: 1rem;
   box-sizing: border-box;
-  width: 500px;
+  width: var(--app-width);
+  height: var(--app-height);
   background-color: var(--theme);
 }
 
@@ -296,11 +324,11 @@ body {
   display: flex;
   width: 100%;
   justify-content: space-evenly;
-  height: 30px;
-  margin: 10px 0;
+  height: var(--button-area-height);
+  margin: var(--button-area-margin) 0;
 
   .btn {
-    height: 30px;
+    height: var(--button-area-height);
   }
 }
 
@@ -460,17 +488,7 @@ body {
   display: none !important;
 }
 
-/* On firefox it is not possible to open a file */
-/* dialog without closing the popup which causes */
-/* the read file logic to stop unexpectedly. */
-/* Need to investigate a workaround. Suggestions include: */
-/* - Crea a new window `browser.window.create` and move the open links UI there. */
-/* Do not display for now */
-#main.firefox #file-btn {
-  display: none;
-}
-
-@media (prefers-color-scheme: ligth) {
+@media (prefers-color-scheme: light) {
   :root {
     /* THEME */
     --theme: var(--light-theme);
