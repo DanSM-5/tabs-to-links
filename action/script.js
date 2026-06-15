@@ -69,6 +69,9 @@
   const copyPage = /** @type {HTMLDivElement} */ (
     document.querySelector(".page.copy-page")
   );
+  const openPage = /** @type {HTMLDivElement} */ (
+    document.querySelector(".page.open-page")
+  );
   const copyTabBtn = /** @type {HTMLButtonElement} */ (
     document.querySelector(".tab.copy-page")
   );
@@ -978,85 +981,126 @@
   };
 
   // ===========================================================================
-  // Tab focus loop for the copy page
+  // Closed Tab focus loops for the copy and open pages
   // ===========================================================================
+
+  /**
+   * A single stop in a page's Tab ring.
+   * - `matches` tells whether focus currently rests on this stop.
+   * - `focus` places focus on the stop and returns `true`, or returns `false`
+   *   to signal the stop should be skipped (hidden control or empty list).
+   * @typedef {{
+   *   matches: (active: Element | null) => boolean;
+   *   focus: () => boolean;
+   * }} TabStop
+   */
+
+  /**
+   * Build a plain element Tab stop. Hidden elements (e.g. the file button on
+   * Firefox) report no offset parent and are skipped automatically.
+   * @param {HTMLElement} element Element to focus
+   * @returns {TabStop}
+   */
+  const elementStop = (element) => ({
+    matches: (active) => active === element,
+    focus: () => {
+      if (!element || element.offsetParent === null) {
+        return false;
+      }
+      element.focus();
+      return true;
+    },
+  });
+
+  /**
+   * Build the special stop for the generated list (#txt-box). Focus enters at
+   * the first visible row; an empty list is skipped so focus lands on the
+   * buttons or the search area.
+   * @returns {TabStop}
+   */
+  const listStop = () => ({
+    matches: (active) => !!active && txtArea.contains(active),
+    focus: () => {
+      const rows = getVisibleRows();
+      if (rows.length === 0) {
+        return false;
+      }
+      focusSegment(rows[0], SEGMENT_FULL);
+      return true;
+    },
+  });
 
   /**
    * Ordered ring of Tab stops for the copy page. The list (#txt-box) is a
    * single stop whose internal rows are reached with the arrow keys.
-   * @returns {HTMLElement[]}
+   * @returns {TabStop[]}
    */
   const getCopyPageTabStops = () => [
-    copyTabBtn,
-    openTabBtn,
-    searchBtn,
-    searchBox,
-    useRegexpBtn,
-    txtArea,
-    allWindowsBtn,
-    resetBtn,
-    downloadBtn,
-    copyBtn,
+    elementStop(copyTabBtn),
+    elementStop(openTabBtn),
+    elementStop(searchBtn),
+    elementStop(searchBox),
+    elementStop(useRegexpBtn),
+    listStop(),
+    elementStop(allWindowsBtn),
+    elementStop(resetBtn),
+    elementStop(downloadBtn),
+    elementStop(copyBtn),
   ];
 
   /**
-   * Move focus to the next/previous Tab stop starting from an index, wrapping
-   * around the ring. When the list stop is reached its first visible row is
-   * focused; an empty list is skipped so focus lands on the buttons or search.
-   * @param {number} fromIndex Index of the current stop
-   * @param {number} direction FORWARD or BACKWARD
-   * @param {HTMLElement[]} stops Ordered stops
-   * @returns {void}
+   * Ordered ring of Tab stops for the open page. The textarea is an ordinary
+   * stop: Tab moves focus out of it (literal tabs are not needed for links).
+   * @returns {TabStop[]}
    */
-  const focusTabStop = (fromIndex, direction, stops) => {
-    const count = stops.length;
-    let next = (fromIndex + direction + count) % count;
-
-    for (let step = 0; step < count; ++step) {
-      const target = stops[next];
-
-      if (target === txtArea) {
-        const rows = getVisibleRows();
-        if (rows.length > 0) {
-          focusSegment(rows[0], SEGMENT_FULL);
-          return;
-        }
-        // Empty list: skip the stop and keep moving in the same direction.
-        next = (next + direction + count) % count;
-        continue;
-      }
-
-      target.focus();
-      return;
-    }
-  };
+  const getOpenPageTabStops = () => [
+    elementStop(copyTabBtn),
+    elementStop(openTabBtn),
+    elementStop(openLinksArea),
+    elementStop(openBtn),
+    elementStop(delayInput),
+    elementStop(fileBtn),
+  ];
 
   /**
-   * Keyboard handler implementing the closed Tab loop of the copy page.
-   * @param {KeyboardEvent} evt
-   * @returns {void}
+   * Create a keydown handler that implements a closed Tab loop for a page.
+   * The loop is only active while its page is visible, so the inactive page's
+   * handler is a no-op and never fights for the same Tab press.
+   * @param {HTMLElement} page Page element guarding when the loop is active
+   * @param {() => TabStop[]} getStops Provider of the ordered ring
+   * @returns {(evt: KeyboardEvent) => void}
    */
-  const onCopyPageTabKeydown = (evt) => {
-    if (evt.key !== TAB_KEY || copyPage.classList.contains(HIDE)) {
+  const createTabLoopHandler = (page, getStops) => (evt) => {
+    if (evt.key !== TAB_KEY || page.classList.contains(HIDE)) {
       return;
     }
 
-    const stops = getCopyPageTabStops();
-    const active = /** @type {HTMLElement | null} */ (document.activeElement);
-
-    // Focus inside the list counts as being on the single list stop.
-    const currentIndex =
-      active && txtArea.contains(active)
-        ? stops.indexOf(txtArea)
-        : stops.indexOf(/** @type {HTMLElement} */ (active));
+    const stops = getStops();
+    const active = document.activeElement;
+    const currentIndex = stops.findIndex((stop) => stop.matches(active));
 
     if (currentIndex === -1) {
       return;
     }
 
     evt.preventDefault();
-    focusTabStop(currentIndex, evt.shiftKey ? BACKWARD : FORWARD, stops);
+
+    const direction = evt.shiftKey ? BACKWARD : FORWARD;
+    const count = stops.length;
+    let next = (currentIndex + direction + count) % count;
+
+    // Walk the ring in the chosen direction, skipping stops that decline focus
+    // (hidden controls or an empty list), wrapping around as needed.
+    for (let step = 0; step < count; ++step) {
+      if (stops[next].focus()) {
+        return;
+      }
+      next = (next + direction + count) % count;
+    }
   };
+
+  const onCopyPageTabKeydown = createTabLoopHandler(copyPage, getCopyPageTabStops);
+  const onOpenPageTabKeydown = createTabLoopHandler(openPage, getOpenPageTabStops);
 
   // Storage methods wrapped in promises.
   /**
@@ -1540,6 +1584,7 @@
     delayInput.addEventListener(KEYDOWN, debouncedSaveDelayTime);
     txtArea.addEventListener(KEYDOWN, onTxtBoxKeydown);
     mainContainer.addEventListener(KEYDOWN, onCopyPageTabKeydown);
+    mainContainer.addEventListener(KEYDOWN, onOpenPageTabKeydown);
     window.addEventListener(LOAD, onWindowsLoad);
     set_notification_handlers();
   };
