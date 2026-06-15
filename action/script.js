@@ -124,6 +124,11 @@
   const ARROW_DOWN = "ArrowDown";
   const ARROW_LEFT = "ArrowLeft";
   const ARROW_RIGHT = "ArrowRight";
+  const HOME = "Home";
+  const END = "End";
+  // Shortcut keys (compared lower-cased, combined with Ctrl)
+  const KEY_FOCUS_SEARCH = "f";
+  const KEY_COPY_ALL = "c";
   // contenteditable attribute values
   const EDITABLE_ON = "true";
   const EDITABLE_OFF = "false";
@@ -947,6 +952,16 @@
         }
         break;
 
+      case HOME:
+        evt.preventDefault();
+        focusSegment(rows[0], segment);
+        break;
+
+      case END:
+        evt.preventDefault();
+        focusSegment(rows[rows.length - 1], segment);
+        break;
+
       case ARROW_LEFT:
         evt.preventDefault();
         if (segment === SEGMENT_FULL) {
@@ -1102,6 +1117,41 @@
 
   const onCopyPageTabKeydown = createTabLoopHandler(copyPage, getCopyPageTabStops);
   const onOpenPageTabKeydown = createTabLoopHandler(openPage, getOpenPageTabStops);
+
+  /**
+   * Ctrl-based shortcuts for the copy page.
+   * - Ctrl+F focuses the search input.
+   * - Ctrl+C copies all visible links (same as the Copy button), unless focus
+   *   is in the search input or editing a row, where it stays a normal copy.
+   * @param {KeyboardEvent} evt
+   * @returns {void}
+   */
+  const onCopyPageShortcuts = (evt) => {
+    if (!evt.ctrlKey || copyPage.classList.contains(HIDE)) {
+      return;
+    }
+
+    const active = document.activeElement;
+
+    switch (evt.key.toLowerCase()) {
+      case KEY_FOCUS_SEARCH:
+        evt.preventDefault();
+        searchBox.focus();
+        break;
+
+      case KEY_COPY_ALL:
+        // Preserve native paste while typing in search or editing a row.
+        if (active === searchBox || !!(/** @type {HTMLElement|null} */ (active)?.isContentEditable)) {
+          return;
+        }
+        evt.preventDefault();
+        copyHandler();
+        break;
+
+      default:
+        break;
+    }
+  };
 
   // Storage methods wrapped in promises.
   /**
@@ -1599,6 +1649,7 @@
     txtArea.addEventListener(KEYDOWN, onTxtBoxKeydown);
     mainContainer.addEventListener(KEYDOWN, onCopyPageTabKeydown);
     mainContainer.addEventListener(KEYDOWN, onOpenPageTabKeydown);
+    mainContainer.addEventListener(KEYDOWN, onCopyPageShortcuts);
     window.addEventListener(LOAD, onWindowsLoad);
     set_notification_handlers();
   };
