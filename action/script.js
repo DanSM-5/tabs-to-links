@@ -66,6 +66,15 @@
   const mainContainer = /** @type {HTMLDivElement} */ (
     document.querySelector("#main")
   );
+  const copyPage = /** @type {HTMLDivElement} */ (
+    document.querySelector(".page.copy-page")
+  );
+  const copyTabBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector(".tab.copy-page")
+  );
+  const openTabBtn = /** @type {HTMLButtonElement} */ (
+    document.querySelector(".tab.open-page")
+  );
   const TAG = "[Tabs2Links]";
   const defaultIcon = "../img/question.png";
   const t2lIcon = "../icons/icon128.png";
@@ -103,6 +112,24 @@
   const DOWNLOAD_MIME = "data:text/plain;charset=utf-8,";
   const OPEN_LINKS = 'open_links';
   const POPOVERTARGET = "popovertarget"
+  // Keyboard navigation
+  const TAB_KEY = "Tab";
+  const ENTER = "Enter";
+  const ESCAPE = "Escape";
+  const ARROW_UP = "ArrowUp";
+  const ARROW_DOWN = "ArrowDown";
+  const ARROW_LEFT = "ArrowLeft";
+  const ARROW_RIGHT = "ArrowRight";
+  // contenteditable attribute values
+  const EDITABLE_ON = "true";
+  const EDITABLE_OFF = "false";
+  // Row navigable segments (columns)
+  const SEGMENT_FULL = "full";
+  const SEGMENT_COPY = "copy";
+  const SEGMENT_DELETE = "delete";
+  // Navigation directions (offsets in the tab-stop ring)
+  const FORWARD = 1;
+  const BACKWARD = -1;
   // CSS Selectors
   const ALL_ROWS = ".row-link";
   const VISIBLE_ROWS = ".row-link:not(.hide)";
@@ -624,7 +651,25 @@
   };
 
   /**
-   * Event handler when a button image is clicked
+   * Removes a row from the list, detaching its click listeners first.
+   * @param {HTMLLIElement} listItem Row to remove
+   * @returns {void}
+   */
+  const removeRowElement = (listItem) => {
+    const list = listItem.parentElement;
+    const imageWrapper = /** @type { HTMLDivElement } */ (
+      listItem.querySelector(COPY_BUTTON)
+    );
+    const closeWrapper = /** @type { HTMLDivElement } */ (
+      listItem.querySelector(REMOVE_BUTTON)
+    );
+    imageWrapper?.removeEventListener(CLICK, onClickImgButton);
+    closeWrapper?.removeEventListener(CLICK, onClickCloseButton);
+    list?.removeChild(listItem);
+  };
+
+  /**
+   * Event handler when a close button is clicked
    * @param {MouseEvent} evt
    */
   const onClickCloseButton = (evt) => {
@@ -642,24 +687,13 @@
         )
         : /** @type {HTMLLIElement | undefined} */ (target.parentElement);
 
-    // const listItem = (/** @type {{ parentElement?: HTMLDivElement }} */ (evt?.target))
-    //   ?.parentElement;
-
     if (!listItem) {
       // Should be impossible to arrive here
       return;
     }
 
-    const list = listItem.parentElement;
-    const imageWrapper = /** @type { HTMLDivElement } */ (
-      listItem.querySelector(COPY_BUTTON)
-    );
-    const closeWrapper = /** @type { HTMLDivElement } */ (
-      listItem.querySelector(REMOVE_BUTTON)
-    );
-    imageWrapper.removeEventListener(CLICK, onClickImgButton);
-    closeWrapper.removeEventListener(CLICK, onClickCloseButton);
-    list?.removeChild(listItem);
+    // Mouse-driven removal: do not move keyboard focus.
+    removeRowElement(listItem);
   };
 
   /**
@@ -715,6 +749,13 @@
     imageWrapper.classList.add(BUTTON_WRAPPER);
     closeWrapper.classList.add(BUTTON_WRAPPER);
 
+    // Keyboard navigation: each segment (full row, copy button and delete
+    // button) is focusable programmatically but kept out of the natural Tab
+    // order. Arrow keys move focus between them (see onTxtBoxKeydown).
+    item.tabIndex = -1;
+    imageWrapper.tabIndex = -1;
+    closeWrapper.tabIndex = -1;
+
     imageWrapper.addEventListener(CLICK, onClickImgButton);
     closeWrapper.addEventListener(CLICK, onClickCloseButton);
 
@@ -735,6 +776,286 @@
     const { item } = createItemForList(linkText, imageUrl);
 
     return item;
+  };
+
+  // ===========================================================================
+  // Keyboard navigation for the generated list (#txt-box)
+  // ===========================================================================
+
+  /**
+   * Get the currently visible rows of the list in display order.
+   * @returns {HTMLLIElement[]}
+   */
+  const getVisibleRows = () =>
+    /** @type {HTMLLIElement[]} */ (
+      Array.from(txtArea.querySelectorAll(VISIBLE_ROWS))
+    );
+
+  /**
+   * Resolve the row and segment (column) of a focused element inside #txt-box.
+   * @param {Element | null} element Element to inspect (usually activeElement)
+   * @returns {{ row: HTMLLIElement, segment: string } | null}
+   */
+  const getRowContext = (element) => {
+    if (!element || !txtArea.contains(element)) {
+      return null;
+    }
+
+    const row = /** @type {HTMLLIElement | null} */ (element.closest(ALL_ROWS));
+    if (!row) {
+      return null;
+    }
+
+    let segment = SEGMENT_FULL;
+    if (element.matches(COPY_BUTTON)) {
+      segment = SEGMENT_COPY;
+    } else if (element.matches(REMOVE_BUTTON)) {
+      segment = SEGMENT_DELETE;
+    }
+
+    return { row, segment };
+  };
+
+  /**
+   * Move focus to a specific segment of a row.
+   * @param {HTMLLIElement | null | undefined} row Row to focus
+   * @param {string} segment One of SEGMENT_FULL, SEGMENT_COPY, SEGMENT_DELETE
+   * @returns {void}
+   */
+  const focusSegment = (row, segment) => {
+    if (!row) {
+      return;
+    }
+
+    let target = /** @type {HTMLElement} */ (row);
+    if (segment === SEGMENT_COPY) {
+      target = /** @type {HTMLElement} */ (row.querySelector(COPY_BUTTON)) || row;
+    } else if (segment === SEGMENT_DELETE) {
+      target =
+        /** @type {HTMLElement} */ (row.querySelector(REMOVE_BUTTON)) || row;
+    }
+
+    target.focus();
+  };
+
+  /**
+   * Enter edit mode on a row by making its text editable and focusing it.
+   * @param {HTMLLIElement} row Row to edit
+   * @returns {void}
+   */
+  const enterEditMode = (row) => {
+    const span = /** @type {HTMLSpanElement | null} */ (row.querySelector(SPAN));
+    if (!span) {
+      return;
+    }
+
+    span.contentEditable = EDITABLE_ON;
+    span.focus();
+  };
+
+  /**
+   * Leave edit mode and return focus to the full row segment.
+   * @param {HTMLSpanElement} span Editable span being edited
+   * @returns {void}
+   */
+  const exitEditMode = (span) => {
+    span.contentEditable = EDITABLE_OFF;
+    const row = /** @type {HTMLLIElement | null} */ (span.closest(ALL_ROWS));
+    focusSegment(row, SEGMENT_FULL);
+  };
+
+  /**
+   * Copy a single row link to the clipboard.
+   * @param {HTMLLIElement} row Row whose link is copied
+   * @returns {void}
+   */
+  const copyRowLink = (row) => {
+    const text = row.querySelector(SPAN)?.textContent || EMPTY;
+    firefoxNotificationRequest();
+    copyAction(text, false);
+  };
+
+  /**
+   * Delete a row via keyboard and move focus to the close button of the
+   * previous visible row, falling back to the next one, then to the search
+   * input when the list becomes empty.
+   * @param {HTMLLIElement} row Row to delete
+   * @returns {void}
+   */
+  const deleteRowByKeyboard = (row) => {
+    const rows = getVisibleRows();
+    const index = rows.indexOf(row);
+    const previous = index > 0 ? rows[index - 1] : null;
+    const next = index < rows.length - 1 ? rows[index + 1] : null;
+
+    removeRowElement(row);
+
+    if (previous) {
+      focusSegment(previous, SEGMENT_DELETE);
+    } else if (next) {
+      focusSegment(next, SEGMENT_DELETE);
+    } else {
+      searchBox.focus();
+    }
+  };
+
+  /**
+   * Keyboard handler for navigation inside the generated list (#txt-box).
+   * Arrow keys move between rows and segments, Enter activates the focused
+   * segment and Escape leaves edit mode.
+   * @param {KeyboardEvent} evt
+   * @returns {void}
+   */
+  const onTxtBoxKeydown = (evt) => {
+    const active = /** @type {HTMLElement | null} */ (document.activeElement);
+
+    // While editing a row, only intercept Escape so the caret keys keep
+    // working as expected inside the editable text.
+    if (active?.isContentEditable) {
+      if (evt.key === ESCAPE) {
+        evt.preventDefault();
+        exitEditMode(/** @type {HTMLSpanElement} */ (active));
+      }
+      return;
+    }
+
+    const context = getRowContext(active);
+    if (!context) {
+      return;
+    }
+
+    const { row, segment } = context;
+    const rows = getVisibleRows();
+    const index = rows.indexOf(row);
+
+    switch (evt.key) {
+      case ARROW_DOWN:
+        evt.preventDefault();
+        if (index < rows.length - 1) {
+          focusSegment(rows[index + 1], segment);
+        }
+        break;
+
+      case ARROW_UP:
+        evt.preventDefault();
+        if (index > 0) {
+          focusSegment(rows[index - 1], segment);
+        }
+        break;
+
+      case ARROW_LEFT:
+        evt.preventDefault();
+        if (segment === SEGMENT_FULL) {
+          focusSegment(row, SEGMENT_COPY);
+        } else if (segment === SEGMENT_DELETE) {
+          focusSegment(row, SEGMENT_FULL);
+        }
+        break;
+
+      case ARROW_RIGHT:
+        evt.preventDefault();
+        if (segment === SEGMENT_FULL) {
+          focusSegment(row, SEGMENT_DELETE);
+        } else if (segment === SEGMENT_COPY) {
+          focusSegment(row, SEGMENT_FULL);
+        }
+        break;
+
+      case ENTER:
+        evt.preventDefault();
+        if (segment === SEGMENT_COPY) {
+          copyRowLink(row);
+        } else if (segment === SEGMENT_DELETE) {
+          deleteRowByKeyboard(row);
+        } else {
+          enterEditMode(row);
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  // ===========================================================================
+  // Tab focus loop for the copy page
+  // ===========================================================================
+
+  /**
+   * Ordered ring of Tab stops for the copy page. The list (#txt-box) is a
+   * single stop whose internal rows are reached with the arrow keys.
+   * @returns {HTMLElement[]}
+   */
+  const getCopyPageTabStops = () => [
+    copyTabBtn,
+    openTabBtn,
+    searchBtn,
+    searchBox,
+    useRegexpBtn,
+    txtArea,
+    allWindowsBtn,
+    resetBtn,
+    downloadBtn,
+    copyBtn,
+  ];
+
+  /**
+   * Move focus to the next/previous Tab stop starting from an index, wrapping
+   * around the ring. When the list stop is reached its first visible row is
+   * focused; an empty list is skipped so focus lands on the buttons or search.
+   * @param {number} fromIndex Index of the current stop
+   * @param {number} direction FORWARD or BACKWARD
+   * @param {HTMLElement[]} stops Ordered stops
+   * @returns {void}
+   */
+  const focusTabStop = (fromIndex, direction, stops) => {
+    const count = stops.length;
+    let next = (fromIndex + direction + count) % count;
+
+    for (let step = 0; step < count; ++step) {
+      const target = stops[next];
+
+      if (target === txtArea) {
+        const rows = getVisibleRows();
+        if (rows.length > 0) {
+          focusSegment(rows[0], SEGMENT_FULL);
+          return;
+        }
+        // Empty list: skip the stop and keep moving in the same direction.
+        next = (next + direction + count) % count;
+        continue;
+      }
+
+      target.focus();
+      return;
+    }
+  };
+
+  /**
+   * Keyboard handler implementing the closed Tab loop of the copy page.
+   * @param {KeyboardEvent} evt
+   * @returns {void}
+   */
+  const onCopyPageTabKeydown = (evt) => {
+    if (evt.key !== TAB_KEY || copyPage.classList.contains(HIDE)) {
+      return;
+    }
+
+    const stops = getCopyPageTabStops();
+    const active = /** @type {HTMLElement | null} */ (document.activeElement);
+
+    // Focus inside the list counts as being on the single list stop.
+    const currentIndex =
+      active && txtArea.contains(active)
+        ? stops.indexOf(txtArea)
+        : stops.indexOf(/** @type {HTMLElement} */ (active));
+
+    if (currentIndex === -1) {
+      return;
+    }
+
+    evt.preventDefault();
+    focusTabStop(currentIndex, evt.shiftKey ? BACKWARD : FORWARD, stops);
   };
 
   // Storage methods wrapped in promises.
@@ -1217,6 +1538,8 @@
     fileBtn .addEventListener(CLICK, onOpenFilesClick);
     delayInput.addEventListener(CHANGE, debouncedSaveDelayTime);
     delayInput.addEventListener(KEYDOWN, debouncedSaveDelayTime);
+    txtArea.addEventListener(KEYDOWN, onTxtBoxKeydown);
+    mainContainer.addEventListener(KEYDOWN, onCopyPageTabKeydown);
     window.addEventListener(LOAD, onWindowsLoad);
     set_notification_handlers();
   };

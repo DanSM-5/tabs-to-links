@@ -245,6 +245,13 @@ body {
   outline-color: var(--theme-button-hover);
 }
 
+/* Keyboard focus border for the navigable row segments */
+.row-link:focus,
+.row-link .button-wrapper:focus {
+  outline: 2px solid var(--theme-button-hover);
+  outline-offset: -2px;
+}
+
 .row-link .tab-icon {
   letter-spacing: unset;
   word-spacing: unset;
