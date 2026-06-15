@@ -86,6 +86,7 @@
   const DEFAULT_DELAY = 1;
   // Constants
   const BLUR = "blur";
+  const FOCUS = "focus";
   const CLICK = "click";
   const CHANGE = "change";
   const MOUSEOVER = "mouseover";
@@ -1527,10 +1528,26 @@
   };
 
   /**
-   * Initialize popovers to show on hover (mouseover/mouseout)
+   * Initialize popovers to show on hover (mouseover/mouseout) and on keyboard
+   * focus (focus/blur), so the hint is reachable without a pointer.
    */
   const startTooltips = () => {
     const elements = Array.from(/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(ELEMENTS_WITH_POPOVERS)));
+
+    /** @param {HTMLElement} target */
+    const showTooltip = (target) => {
+      // Guard against double-showing when hover and focus overlap.
+      if (!target.matches(":popover-open")) {
+        target.showPopover();
+      }
+    };
+
+    /** @param {HTMLElement} target */
+    const hideTooltip = (target) => {
+      if (target.matches(":popover-open")) {
+        target.hidePopover();
+      }
+    };
 
     for (const element of elements) {
       const target = /** @type {HTMLElement} */ (document.querySelector(`#${element.getAttribute(POPOVERTARGET)}`));
@@ -1539,13 +1556,10 @@
         continue;
       }
 
-      element.addEventListener(MOUSEOVER,()=>{
-        target.showPopover();
-      });
-      
-      element.addEventListener(MOUSEOUT,()=>{
-        target.hidePopover();
-      });
+      element.addEventListener(MOUSEOVER, () => showTooltip(target));
+      element.addEventListener(MOUSEOUT, () => hideTooltip(target));
+      element.addEventListener(FOCUS, () => showTooltip(target));
+      element.addEventListener(BLUR, () => hideTooltip(target));
     }
   };
 
