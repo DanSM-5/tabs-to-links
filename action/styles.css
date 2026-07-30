@@ -294,6 +294,7 @@ body {
 
 .btn-area {
   display: flex;
+  width: 100%;
   justify-content: space-evenly;
   height: 30px;
   margin: 10px 0;
