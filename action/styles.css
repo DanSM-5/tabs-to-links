@@ -36,6 +36,7 @@
   --row-height: 45px;
   --link-area-height: 335px;
   --link-text-area-height: 300px;
+  --btn-font-size: 0.9rem;
 }
 
 body {
@@ -82,7 +83,7 @@ body {
     border-bottom-width: 3px;
     border-bottom-color: transparent;
     cursor: pointer;
-    
+
     span {
       color: var(--theme-text);
       pointer-events: none;
@@ -141,7 +142,7 @@ body {
 .search-button {
   background-color: transparent;
   border: unset;
-  margin: var(--ui-left-separation); 
+  margin: var(--ui-left-separation);
 }
 
 .search-box-wrapper {
@@ -154,8 +155,7 @@ body {
 
 #use-regexp-btn {
   margin: 5px 10px;
-  font-size: 0.7em;
-  width: 100px;
+  flex-shrink: 0;
 }
 
 .logo-icon,
@@ -176,7 +176,6 @@ body {
   outline: dotted;
   outline-color: var(--theme-button-hover);
 }
-
 
 .txt-box {
   /* width: var(--txt-box-width);
@@ -267,7 +266,6 @@ body {
   border-width: unset;
   border-style: unset;
   border-color: unset;
-  border-image: initial;
   background: unset;
   background-color: unset;
   appearance: unset;
@@ -296,7 +294,6 @@ body {
 
 .btn-area {
   display: flex;
-  width: 100%;
   justify-content: space-evenly;
   height: 30px;
   margin: 10px 0;
@@ -350,6 +347,7 @@ body {
   cursor: pointer;
   background-color: var(--theme-button);
   color: var(--theme-button-text);
+  font-size: var(--btn-font-size);
 }
 
 .btn span {
@@ -366,7 +364,7 @@ body {
 
 .btn-checked {
   cursor: pointer;
-  justify-content: space-between;
+  justify-content: space-evenly;
 }
 
 .ignore-button {
@@ -393,6 +391,7 @@ body {
   flex-shrink: 0;
   cursor: pointer;
 }
+
 .close-button:before,
 .close-button:after {
   content: "";
@@ -413,6 +412,7 @@ body {
   -o-transition: all 0.3s ease-out;
   transition: all 0.3s ease-out;
 }
+
 .close-button:after {
   -webkit-transform: rotate(45deg);
   -moz-transform: rotate(45deg);
@@ -425,6 +425,7 @@ body {
   -o-transition: all 0.3s ease-out;
   transition: all 0.3s ease-out;
 }
+
 .button-wrapper:hover .close-button:before,
 .button-wrapper:hover .close-button:after {
   -webkit-transform: rotate(180deg);
@@ -447,7 +448,7 @@ body {
 .tooltip {
   position: absolute;
   border-radius: 0.5rem;
-  font-size: .5rem;
+  font-size: 0.5rem;
   background-color: var(--theme-odds);
   color: var(--theme-text);
   border: 1px solid var(--theme-text);
