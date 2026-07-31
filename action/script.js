@@ -318,8 +318,6 @@
   // Firefox only auto-dismisses the special popup panel, not ordinary windows.
   const STANDALONE_PARAM = "standalone";
   const FILE_PICKER_DRAFT_KEY = "file_picker_draft";
-  const STANDALONE_WINDOW_WIDTH = 520;
-  const STANDALONE_WINDOW_HEIGHT = 640;
 
   const isStandaloneWindow = new URLSearchParams(window.location.search).has(STANDALONE_PARAM);
 
@@ -1508,11 +1506,29 @@
   };
 
   /**
+   * The extension's fixed content size (see the --app-width/--app-height
+   * calc() in styles.css, built from the tabs row, search row, links list
+   * and button row). Reading it back here — rather than measuring the
+   * rendered DOM with getBoundingClientRect — is deterministic regardless of
+   * whether the subtree has finished laying out or painting yet, since it
+   * resolves purely from fixed top-level constants.
+   * @returns {{ width: number; height: number; }}
+   */
+  const getAppContentSize = () => {
+    const mainStyles = getComputedStyle(mainContainer);
+    return {
+      width: Number.parseFloat(mainStyles.width),
+      height: Number.parseFloat(mainStyles.height),
+    };
+  };
+
+  /**
    * Resize the standalone window (opened for the Firefox file-picker
-   * workaround, see isStandaloneWindow above) so it matches the extension's
-   * actual content size. Unlike the real popup, a regular window does not
-   * auto-size to its content, and the two pages (copy/open) have different
-   * fixed heights, so this re-measures on every tab switch.
+   * workaround, see isStandaloneWindow above) so its viewport exactly
+   * matches the extension's fixed content size. Unlike the real popup, a
+   * regular window does not auto-size to its content, and windows.update
+   * sets the outer window size, so this measures the gap between the
+   * window's frame and its viewport once the window has settled.
    * @returns {void}
    */
   const fitStandaloneWindowToContent = () => {
@@ -1520,9 +1536,7 @@
       return;
     }
 
-    const { width, height } = mainContainer.getBoundingClientRect();
-    // windows.update sets the outer window size, so account for the
-    // browser chrome (title bar, borders) around the page viewport.
+    const { width, height } = getAppContentSize();
     const widthChrome = window.outerWidth - window.innerWidth;
     const heightChrome = window.outerHeight - window.innerHeight;
 
@@ -1557,8 +1571,6 @@
     // Set display tab
     document.querySelector(`.page.${hideClass}`)?.classList.add(HIDE);
     document.querySelector(`.page.${showClass}`)?.classList.remove(HIDE);
-
-    fitStandaloneWindowToContent();
   };
 
   const onSelectedFiles = async () => {
@@ -1599,11 +1611,13 @@
       delay: getDelayValue(),
     });
 
+    const { width, height } = getAppContentSize();
+
     chrome.windows.create({
       url: chrome.runtime.getURL(`action/index.html?${STANDALONE_PARAM}=1`),
       type: "popup",
-      width: STANDALONE_WINDOW_WIDTH,
-      height: STANDALONE_WINDOW_HEIGHT,
+      width,
+      height,
     });
 
     window.close();
@@ -1716,6 +1730,8 @@
     initialTabsSetup();
 
     if (isStandaloneWindow) {
+      fitStandaloneWindowToContent();
+
       const draft = await takeFilePickerDraft();
       if (draft) {
         openLinksArea.value = draft.links;

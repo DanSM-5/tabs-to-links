@@ -37,6 +37,19 @@
   --link-area-height: 335px;
   --link-text-area-height: 300px;
   --btn-font-size: 0.9rem;
+  --button-area-height: 30px;
+  --button-area-margin: 10px;
+
+  /* App frame size, built from its fixed-height sections: the tabs row,
+     the search row, the links list, and the button row (with its margin).
+     Kept as a single source of truth so script.js can read it back via
+     getComputedStyle() to size the standalone window used for the Firefox
+     file-picker workaround (see action/script.js). */
+  --app-width: 500px;
+  --app-height: calc(
+    var(--row-height) + var(--row-height) + var(--link-area-height) +
+      var(--button-area-height) + (var(--button-area-margin) * 2)
+  );
 }
 
 body {
@@ -50,7 +63,8 @@ body {
   flex-direction: column;
   font-size: 1rem;
   box-sizing: border-box;
-  width: 500px;
+  width: var(--app-width);
+  height: var(--app-height);
   background-color: var(--theme);
 }
 
@@ -296,11 +310,11 @@ body {
   display: flex;
   width: 100%;
   justify-content: space-evenly;
-  height: 30px;
-  margin: 10px 0;
+  height: var(--button-area-height);
+  margin: var(--button-area-margin) 0;
 
   .btn {
-    height: 30px;
+    height: var(--button-area-height);
   }
 }
 
