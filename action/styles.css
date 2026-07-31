@@ -1,3 +1,14 @@
+/* Registered so its calc() resolves to a real length when read back via
+   getComputedStyle(document.documentElement).getPropertyValue('--app-height')
+   in script.js. Unregistered custom properties return calc() expressions
+   as an unevaluated string (see https://github.com/w3c/csswg-drafts/issues/2358),
+   which parseFloat() can't use. */
+@property --app-height {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 :root {
   /* DARK THEME */
   --dark-theme: hsl(225, 6%, 13%);

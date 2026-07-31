@@ -1506,19 +1506,22 @@
   };
 
   /**
-   * The extension's fixed content size (see the --app-width/--app-height
-   * calc() in styles.css, built from the tabs row, search row, links list
-   * and button row). Reading it back here — rather than measuring the
-   * rendered DOM with getBoundingClientRect — is deterministic regardless of
-   * whether the subtree has finished laying out or painting yet, since it
-   * resolves purely from fixed top-level constants.
+   * The extension's fixed content size, read directly from the
+   * --app-width/--app-height custom properties (see :root in styles.css,
+   * built from the tabs row, search row, links list and button row).
+   * --app-height is registered via @property with a <length> syntax so its
+   * calc() resolves to a real value here instead of being returned as an
+   * unevaluated "calc(...)" string. Reading these — rather than measuring
+   * the rendered DOM — is deterministic regardless of whether the subtree
+   * has finished laying out or painting yet, since it resolves purely from
+   * fixed top-level constants.
    * @returns {{ width: number; height: number; }}
    */
   const getAppContentSize = () => {
-    const mainStyles = getComputedStyle(mainContainer);
+    const rootStyles = getComputedStyle(document.documentElement);
     return {
-      width: Number.parseFloat(mainStyles.width),
-      height: Number.parseFloat(mainStyles.height),
+      width: Number.parseFloat(rootStyles.getPropertyValue("--app-width")),
+      height: Number.parseFloat(rootStyles.getPropertyValue("--app-height")),
     };
   };
 
