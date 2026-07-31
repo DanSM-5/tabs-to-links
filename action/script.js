@@ -1527,11 +1527,9 @@
 
   /**
    * Resize the standalone window (opened for the Firefox file-picker
-   * workaround, see isStandaloneWindow above) so its viewport exactly
-   * matches the extension's fixed content size. Unlike the real popup, a
-   * regular window does not auto-size to its content, and windows.update
-   * sets the outer window size, so this measures the gap between the
-   * window's frame and its viewport once the window has settled.
+   * workaround, see isStandaloneWindow above) so its outer size matches the
+   * extension's fixed content size directly (no frame/chrome compensation —
+   * matching that is what actually fits the UI).
    * @returns {void}
    */
   const fitStandaloneWindowToContent = () => {
@@ -1540,18 +1538,13 @@
     }
 
     const { width, height } = getAppContentSize();
-    const widthChrome = window.outerWidth - window.innerWidth;
-    const heightChrome = window.outerHeight - window.innerHeight;
 
     chrome.windows.getCurrent((win) => {
       if (win.id === undefined) {
         return;
       }
 
-      chrome.windows.update(win.id, {
-        width: Math.ceil(width + widthChrome),
-        height: Math.ceil(height + heightChrome),
-      });
+      chrome.windows.update(win.id, { width, height });
     });
   };
 
