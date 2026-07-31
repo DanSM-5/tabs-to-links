@@ -327,7 +327,6 @@
   const CREATION_RATIO = 'devicePixelRatio';
 
   const urlParams = new URLSearchParams(window.location.search);
-  console.log(urlParams.toString());
   const isStandaloneWindow = urlParams.has(
     STANDALONE_PARAM,
   );
@@ -1803,10 +1802,6 @@
     initialTabsSetup();
 
     if (isStandaloneWindow) {
-      console.log('Sizes (before update):', {
-        width: window.outerWidth,
-        height: window.outerHeight,
-      });
       fitStandaloneWindowToContent();
 
       const draft = await takeFilePickerDraft();
