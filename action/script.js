@@ -311,6 +311,18 @@
     return FIREFOX;
   })();
 
+  // Firefox destroys the browserAction popup document as soon as the native
+  // file picker steals focus (https://bugzilla.mozilla.org/show_bug.cgi?id=1433604),
+  // so the 'change' event on #file-input never reaches it. Working around this
+  // means picking the file from a regular extension window instead, since
+  // Firefox only auto-dismisses the special popup panel, not ordinary windows.
+  const STANDALONE_PARAM = "standalone";
+  const FILE_PICKER_DRAFT_KEY = "file_picker_draft";
+  const STANDALONE_WINDOW_WIDTH = 520;
+  const STANDALONE_WINDOW_HEIGHT = 640;
+
+  const isStandaloneWindow = new URLSearchParams(window.location.search).has(STANDALONE_PARAM);
+
   /**
    * Add styles to the document by appending a style tag.
    * @param {string} style Styles to append to the document
@@ -1205,6 +1217,37 @@
   };
 
   /**
+   * @typedef {{ links: string; delay: number; }} FilePickerDraft
+   */
+
+  /**
+   * Stash the in-progress "open links" state in local (non-synced) storage so
+   * it can be restored by the standalone window opened for the Firefox file
+   * picker workaround.
+   * @param {FilePickerDraft} draft
+   * @returns {Promise<void>}
+   */
+  const saveFilePickerDraft = (draft) => {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ [FILE_PICKER_DRAFT_KEY]: draft }, () => resolve());
+    });
+  };
+
+  /**
+   * Read and clear the stashed "open links" state left by the popup before it
+   * opened the standalone file-picker window.
+   * @returns {Promise<FilePickerDraft | null>}
+   */
+  const takeFilePickerDraft = () => {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(FILE_PICKER_DRAFT_KEY, (stored) => {
+        const draft = stored[FILE_PICKER_DRAFT_KEY] || null;
+        chrome.storage.local.remove(FILE_PICKER_DRAFT_KEY, () => resolve(draft));
+      });
+    });
+  };
+
+  /**
    *
    * @param {(tab: chrome.tabs.Tab, index: number) => any} callback Callback function
    * @returns {Promise<void>}
@@ -1511,7 +1554,34 @@
     openLinksArea.value = currText;
   };
 
+  /**
+   * Open a standalone extension window carrying over the current draft, so
+   * the native file picker can be used without losing the popup's contents
+   * (see the isStandaloneWindow comment above for why this is needed).
+   * @returns {Promise<void>}
+   */
+  const openStandaloneFilePicker = async () => {
+    await saveFilePickerDraft({
+      links: openLinksArea.value,
+      delay: getDelayValue(),
+    });
+
+    chrome.windows.create({
+      url: chrome.runtime.getURL(`action/index.html?${STANDALONE_PARAM}=1`),
+      type: "popup",
+      width: STANDALONE_WINDOW_WIDTH,
+      height: STANDALONE_WINDOW_HEIGHT,
+    });
+
+    window.close();
+  };
+
   const onOpenFilesClick = () => {
+    if (BROWSER === FIREFOX && !isStandaloneWindow) {
+      openStandaloneFilePicker();
+      return;
+    }
+
     fileInput.click();
   };
 
@@ -1520,7 +1590,7 @@
    * Calling this function will close the popup action page
    * and end this scripts execution
    */
-  const onOpenLinks = () => {
+  const onOpenLinks = async () => {
     /**
      * @type {OpenLinksMessage}
      */
@@ -1534,7 +1604,14 @@
 
     // Both Chrome and Firefox handle this through a runtime.onMessage listener
     // in their background script, so the loop survives the popup closing.
-    sendMessageWorker(message);
+    await sendMessageWorker(message);
+
+    // The standalone window (see openStandaloneFilePicker) is a regular
+    // window, so unlike the popup it will not auto-close once links start
+    // opening and steal focus. Close it explicitly instead.
+    if (isStandaloneWindow) {
+      window.close();
+    }
   };
 
   /**
@@ -1604,6 +1681,17 @@
     updateSearchPlaceholder();
     searchBox.focus();
     initialTabsSetup();
+
+    if (isStandaloneWindow) {
+      const draft = await takeFilePickerDraft();
+      if (draft) {
+        openLinksArea.value = draft.links;
+        // @ts-expect-error Set current value even if number
+        delayInput.value = draft.delay;
+        openTabBtn.click();
+        fileBtn.focus();
+      }
+    }
     // setObserverTxtArea();
   };
 
