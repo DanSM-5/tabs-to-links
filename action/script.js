@@ -316,10 +316,16 @@
   // so the 'change' event on #file-input never reaches it. Working around this
   // means picking the file from a regular extension window instead, since
   // Firefox only auto-dismisses the special popup panel, not ordinary windows.
-  const STANDALONE_PARAM = "standalone";
-  const FILE_PICKER_DRAFT_KEY = "file_picker_draft";
+  const STANDALONE_PARAM = 'standalone';
+  const FILE_PICKER_DRAFT_KEY = 'file_picker_draft';
+  const CREATION_RATIO = 'devicePixelRatio';
 
-  const isStandaloneWindow = new URLSearchParams(window.location.search).has(STANDALONE_PARAM);
+  const urlParams = new URLSearchParams(window.location.search);
+  console.log(urlParams.toString());
+  const isStandaloneWindow = urlParams.has(
+    STANDALONE_PARAM,
+  );
+  const creationRatio = parseFloat(urlParams.get(CREATION_RATIO) ?? '1');
 
   /**
    * Add styles to the document by appending a style tag.
@@ -1515,13 +1521,25 @@
    * the rendered DOM — is deterministic regardless of whether the subtree
    * has finished laying out or painting yet, since it resolves purely from
    * fixed top-level constants.
+   *
+   * Resolved sizes apply a `devicePixelRatio` adjustment (window.devicePixelRatio from popup)
+   * needed to properly resize the resulting standalone window.
+   *
    * @returns {{ width: number; height: number; }}
    */
   const getAppContentSize = () => {
     const rootStyles = getComputedStyle(document.documentElement);
+    const correctionRatio = isStandaloneWindow ? creationRatio : window.devicePixelRatio
+
     return {
-      width: Number.parseFloat(rootStyles.getPropertyValue("--app-width")),
-      height: Number.parseFloat(rootStyles.getPropertyValue("--app-height")),
+      width: Math.round(
+        Number.parseFloat(rootStyles.getPropertyValue('--app-width')) *
+        correctionRatio,
+      ),
+      height: Math.round(
+        Number.parseFloat(rootStyles.getPropertyValue('--app-height')) *
+        correctionRatio,
+      ),
     };
   };
 
@@ -1537,14 +1555,31 @@
       return;
     }
 
-    const { width, height } = getAppContentSize();
-
-    chrome.windows.getCurrent((win) => {
+    chrome.windows.getCurrent(async (win) => {
       if (win.id === undefined) {
         return;
       }
 
-      chrome.windows.update(win.id, { width, height });
+      const { width: _width, height } = getAppContentSize();
+      // Debug log
+      // console.log(
+      //   `chrome.windows.update(${win.id}, { width: ${width}, height: ${height} })`,
+      // );
+      await chrome.windows.update(win.id, {
+        // Need to adjust height only to include the window navigation bar
+        height: height + (window.outerHeight - window.innerHeight),
+      });
+      // Debug log
+      // console.log('Sizes (after update):', {
+      //   width: _width,
+      //   height,
+      //   outerWidth,
+      //   outerHeight,
+      //   innerWidth,
+      //   innerHeight,
+      //   devicePixelRatio,
+      //   creationRatio,
+      // });
     });
   };
 
@@ -1609,13 +1644,19 @@
 
     const { width, height } = getAppContentSize();
 
+    const url = chrome.runtime.getURL(
+      `action/index.html?${STANDALONE_PARAM}=1&${CREATION_RATIO}=${window.devicePixelRatio}`,
+    );
     chrome.windows.create({
-      url: chrome.runtime.getURL(`action/index.html?${STANDALONE_PARAM}=1`),
-      type: "popup",
+      url,
+      type: 'popup',
       width,
       height,
     });
-
+    // Debug log
+    // console.log(
+    //   `chrome.windows.create({ url: ${url}, type: 'popup', width: ${width}, height: ${height} })`,
+    // );
     window.close();
   };
 
