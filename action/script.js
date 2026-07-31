@@ -1508,6 +1508,37 @@
   };
 
   /**
+   * Resize the standalone window (opened for the Firefox file-picker
+   * workaround, see isStandaloneWindow above) so it matches the extension's
+   * actual content size. Unlike the real popup, a regular window does not
+   * auto-size to its content, and the two pages (copy/open) have different
+   * fixed heights, so this re-measures on every tab switch.
+   * @returns {void}
+   */
+  const fitStandaloneWindowToContent = () => {
+    if (!isStandaloneWindow) {
+      return;
+    }
+
+    const { width, height } = mainContainer.getBoundingClientRect();
+    // windows.update sets the outer window size, so account for the
+    // browser chrome (title bar, borders) around the page viewport.
+    const widthChrome = window.outerWidth - window.innerWidth;
+    const heightChrome = window.outerHeight - window.innerHeight;
+
+    chrome.windows.getCurrent((win) => {
+      if (win.id === undefined) {
+        return;
+      }
+
+      chrome.windows.update(win.id, {
+        width: Math.ceil(width + widthChrome),
+        height: Math.ceil(height + heightChrome),
+      });
+    });
+  };
+
+  /**
    * @param {MouseEvent} evt
    */
   const onTabClick = (evt) => {
@@ -1526,6 +1557,8 @@
     // Set display tab
     document.querySelector(`.page.${hideClass}`)?.classList.add(HIDE);
     document.querySelector(`.page.${showClass}`)?.classList.remove(HIDE);
+
+    fitStandaloneWindowToContent();
   };
 
   const onSelectedFiles = async () => {
