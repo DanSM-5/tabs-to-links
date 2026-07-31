@@ -10,3 +10,6 @@ node_modules/
 .npmrc.win
 .npmrc.lin
 .env*
+
+# clankers
+.claude
