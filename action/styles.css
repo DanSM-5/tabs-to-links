@@ -46,9 +46,10 @@
   --ui-left-separation: 3px;
   --row-height: 45px;
   --link-area-height: 335px;
+  --link-text-area-margin-top: 5px;
   /* Match the copy page's search row + links list, so both tabs share the
      same total content height (see --app-height below). */
-  --link-text-area-height: calc(var(--row-height) + var(--link-area-height));
+  --link-text-area-height: calc(var(--row-height) + var(--link-area-height) - var(--link-text-area-margin-top));
   --btn-font-size: 0.9rem;
   --button-area-height: 30px;
   --button-area-margin: 10px;
@@ -93,6 +94,8 @@ body {
   display: flex;
   gap: 1px;
   align-items: center;
+  flex-shrink: 0;
+  flex-grow: 0;
   background-color: var(--container-background-color);
   border-bottom-style: solid;
   border-bottom-width: 2px;
@@ -148,7 +151,7 @@ body {
   background-color: var(--theme);
   color: var(--theme-text);
   box-sizing: border-box;
-  margin-top: 5px;
+  margin-top: var(--link-text-area-margin-top);
   border-radius: 10px;
   scrollbar-width: thin;
   scrollbar-color: var(--theme-scroll-color) var(--theme-scroll-background);
